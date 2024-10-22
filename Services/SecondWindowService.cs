@@ -32,13 +32,13 @@ public class SecondWindowService : ISecondWindowService
         }
     }
 
-    public async Task OpenWindowWith<T>(object? args = null) where T : SecondWindowPageVMBase 
+    public async Task OpenWindowWith<T>(object? args = null) where T : SecondWindowPageVMBase
     {
         _ = Task.Run(ClearPage);
 
         navigation.NavigateTo<LoadingPageVM>();
         SecondWindowPageVMBase loading = (SecondWindowPageVMBase)navigation.ActiveView;
-        
+
         secondWindowVm.ActivePage = loading;
         secondWindowView.Show();
 

@@ -16,8 +16,8 @@ public partial class ViewDayDetailsPageVM : SecondWindowPageVMBase
     private DayData? loadedDayData;
 
     private int LoadedPageType = 0;
-    private ISecondWindowService secondWindowService;
-    private DataBaseHandler database;
+    private readonly ISecondWindowService secondWindowService;
+    private readonly DataBaseHandler database;
     public ViewDayDetailsPageVM(ISecondWindowService secondWindowService, DataBaseHandler database)
     {
         RequiredWindowSize = new Vector2(430, 440);
@@ -29,7 +29,7 @@ public partial class ViewDayDetailsPageVM : SecondWindowPageVMBase
     private async Task RequiestData()
     {
         List<ProcessActivityData> RequestedActivity = (await database.ReadDayActivity(LoadedDayData!.Date));
-        Activities = RequestedActivity.OrderByDescending(data => data.TimeSpentC).ToArray();
+        Activities = [.. RequestedActivity.OrderByDescending(data => data.TimeSpentC)];
     }
 
     public override Task OnPageOppeningAsync(object? args)
@@ -40,7 +40,7 @@ public partial class ViewDayDetailsPageVM : SecondWindowPageVMBase
             {
                 LoadedPageType = loadedpagetype;
                 LoadedDayData = day;
-                WindowPageName = $"{LoadedDayData.DateC.ToString("MM/dd/yyyy")} Activity";
+                WindowPageName = $"{LoadedDayData.DateC:MM/dd/yyyy} Activity";
                 _ = RequiestData();
                 return base.OnPageOppeningAsync(args);
             }

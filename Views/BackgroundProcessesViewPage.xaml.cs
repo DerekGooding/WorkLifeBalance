@@ -7,7 +7,7 @@ namespace WorkLifeBalance.Views;
 /// </summary>
 public partial class BackgroundProcessesViewPage : Page
 {
-    public BackgroundProcessesViewPage() 
+    public BackgroundProcessesViewPage()
     {
         InitializeComponent();
     }

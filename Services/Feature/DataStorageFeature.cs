@@ -86,7 +86,6 @@ public class DataStorageFeature : FeatureBase
         {
             Log.Error(ex, "DataStorage");
         }
-
         finally
         {
             IsFeatureRuning = false;

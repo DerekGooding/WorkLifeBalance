@@ -50,9 +50,9 @@ public partial class ViewDataPageVM : SecondWindowPageVMBase
     [ObservableProperty]
     private DateOnly previousMonthMostRestedDate;
 
-    private DataBaseHandler databaseHandler;
-    private DataStorageFeature dataStorageFeature;
-    private ISecondWindowService secondWindowService;
+    private readonly DataBaseHandler databaseHandler;
+    private readonly DataStorageFeature dataStorageFeature;
+    private readonly ISecondWindowService secondWindowService;
     public ViewDataPageVM(DataBaseHandler databaseHandler, DataStorageFeature dataStorageFeature, ISecondWindowService secondWindowService)
     {
         RequiredWindowSize = new Vector2(750, 580);
@@ -91,8 +91,6 @@ public partial class ViewDataPageVM : SecondWindowPageVMBase
         CurrentMonthMostRested = TempDay.RestedAmmountC;
         CurrentMonthMostRestedDate = TempDay.DateC;
 
-
-
         //calculate previous month records
         DateTime previousMonthDateTime = currentDate.ToDateTime(new TimeOnly(0, 0, 0)).AddMonths(-1);
         DateOnly previousDate = DateOnly.FromDateTime(previousMonthDateTime);
@@ -106,7 +104,6 @@ public partial class ViewDataPageVM : SecondWindowPageVMBase
 
         PreviousMonthMostRested = TempDay.RestedAmmountC;
         PreviousMonthMostRestedDate = TempDay.DateC;
-
 
         //calculate total days in current and previous months
         CurrentMonthTotalDays = await databaseHandler.ReadCountInMonth(currentDate.ToString("MM"));
@@ -143,7 +140,7 @@ public partial class ViewDataPageVM : SecondWindowPageVMBase
         int seconds = 0;
         seconds += time.Second;
         seconds += time.Minute * 60;
-        seconds += (time.Hour * 60) * 60;
+        seconds += time.Hour * 60 * 60;
 
         return seconds;
     }

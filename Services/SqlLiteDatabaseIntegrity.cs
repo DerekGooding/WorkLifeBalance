@@ -7,7 +7,7 @@ public class SqlLiteDatabaseIntegrity
     private readonly SqlDataAccess sqlDataAccess;
     private readonly DataStorageFeature dataStorageFeature;
     private readonly Dictionary<string, Func<Task>> DatabaseUpdates;
-    private string databasePath = "";
+    private readonly string databasePath = "";
 
     public SqlLiteDatabaseIntegrity(SqlDataAccess sqlDataAccess, DataStorageFeature dataStorageFeature)
     {
@@ -52,7 +52,7 @@ public class SqlLiteDatabaseIntegrity
                 string databaseVersion = await GetDatabaseVersion();
                 //if its not up to date, then we call this method again, to give it the next update
                 Log.Warning($"Database Updated to version {databaseVersion}");
-              
+
                 await UpdateOrCreateDatabase(databaseVersion);
             }
             else
@@ -82,13 +82,13 @@ public class SqlLiteDatabaseIntegrity
 
         try
         {
-            var result = (await sqlDataAccess.ReadDataAsync<string, dynamic>(sql, new { })).FirstOrDefault();
+            string? result = (await sqlDataAccess.ReadDataAsync<string, dynamic>(sql, new { })).FirstOrDefault();
             if(result != null)
             {
                 version = result;
             }
         }
-        catch            
+        catch
         {
             Log.Warning("Database Version collumn not found, indicatin Beta version database");
         }
@@ -193,7 +193,6 @@ public class SqlLiteDatabaseIntegrity
             	"WorkingStateWindows"	TEXT NOT NULL UNIQUE);
             """;
         await sqlDataAccess.ExecuteAsync(createWorkingWindowsSQL, new { });
-
 
         await UpdateDatabaseVersion("2.0.0");
     }

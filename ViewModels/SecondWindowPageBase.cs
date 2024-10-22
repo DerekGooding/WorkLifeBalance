@@ -6,8 +6,8 @@ namespace WorkLifeBalance.ViewModels;
 public abstract partial class SecondWindowPageVMBase : ViewModelBase
 {
     [ObservableProperty]
-    public Vector2 requiredWindowSize = new Vector2(250, 300);
-    
+    public Vector2 requiredWindowSize = new(250, 300);
+
     [ObservableProperty]
     public string windowPageName = "Page";
 

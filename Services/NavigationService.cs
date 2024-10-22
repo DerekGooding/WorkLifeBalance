@@ -17,7 +17,7 @@ public partial class NavigationService : ObservableObject, INavigationService
 
     public void NavigateTo<TViewModelbase>() where TViewModelbase : ViewModelBase
     {
-        ViewModelBase viewModel = _viewModelFactory.Invoke(typeof(TViewModelbase)); 
+        ViewModelBase viewModel = _viewModelFactory.Invoke(typeof(TViewModelbase));
         ActiveView = viewModel;
     }
 }

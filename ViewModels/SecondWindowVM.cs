@@ -5,7 +5,6 @@ namespace WorkLifeBalance.ViewModels;
 
 public partial class SecondWindowVM : ObservableObject
 {
-
     [ObservableProperty]
     public SecondWindowPageVMBase? activePage;
 
@@ -33,4 +32,3 @@ public enum SecondWindowType
     ViewDayActivity,
     Options
 }
-

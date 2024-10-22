@@ -31,7 +31,7 @@ public partial class App : Application
                })
                .Build();
 
-    private void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton(provider => new MainWindow
         {
@@ -114,9 +114,9 @@ public partial class App : Application
         await sqlLiteDatabaseIntegrity.CheckDatabaseIntegrity();
 
         await dataStorageFeature.LoadData();
-        
+
         AppTimer appTimer = _host.Services.GetRequiredService<AppTimer>();
-        
+
         //set app ready so timers can start
         dataStorageFeature.IsAppReady = true;
 
@@ -130,15 +130,15 @@ public partial class App : Application
         //starts the main timer
         appTimer.StartTick();
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+        MainWindow mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         Log.Information("------------------App Initialized------------------");
     }
 
     private void RestartApplicationWithAdmin()
     {
-        var DataStorageFeature = _host.Services.GetRequiredService<DataStorageFeature>();
-        var psi = new ProcessStartInfo
+        DataStorageFeature DataStorageFeature = _host.Services.GetRequiredService<DataStorageFeature>();
+        ProcessStartInfo psi = new()
         {
             FileName = DataStorageFeature.Settings.AppExePath,
             UseShellExecute = true,

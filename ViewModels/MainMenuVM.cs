@@ -88,5 +88,4 @@ public partial class MainMenuVM : ObservableObject
         //Application.Current.Shutdown();
         //await Task.Delay(55);
     }
-
 }

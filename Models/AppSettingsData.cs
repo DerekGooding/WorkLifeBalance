@@ -41,13 +41,11 @@ public class AppSettingsData
                     );
             }
             StartWithWindowsC = StartWithWindows == 1;
-
         }
         catch (Exception ex)
         {
             Log.Error("AppSettings Error: Failed to convert data to usable data", ex);
         }
-
     }
 
     public void ConvertUsableDataToSaveData()

@@ -5,7 +5,7 @@ namespace WorkLifeBalance.Services;
 public class AppStateHandler
 {
     public event Action<AppState>? OnStateChanges;
-    
+
     private AppState appTimerState = AppState.Resting;
     public AppState AppTimerState
     {

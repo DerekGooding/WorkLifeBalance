@@ -44,7 +44,6 @@ public class DataBaseHandler
                 await dataAccess.WriteDataAsync(InsertActivitySql, activity);
             }
         }
-
     }
 
     public async Task<AutoStateChangeData> ReadAutoStateData(string date)
@@ -54,26 +53,25 @@ public class DataBaseHandler
         string sql = @$"SELECT * FROM Activity
                             WHERE Date = @Date";
 
-        retrivedSettings.Activities = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToArray();
+        retrivedSettings.Activities = [.. (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date }))];
 
         sql = @$"SELECT * FROM WorkingWindows";
 
-        retrivedSettings.WorkingStateWindows = (await dataAccess.ReadDataAsync<string, dynamic>(sql, new { })).ToArray();
+        retrivedSettings.WorkingStateWindows = [.. (await dataAccess.ReadDataAsync<string, dynamic>(sql, new { }))];
 
         retrivedSettings.ConvertSaveDataToUsableData();
-        
+
         return retrivedSettings;
     }
 
     public async Task<List<ProcessActivityData>> ReadDayActivity(string date)
     {
-        List<ProcessActivityData> ReturnActivity = new();
+        List<ProcessActivityData> ReturnActivity = [];
 
         string sql = @$"SELECT * from Activity 
                             WHERE Date Like @Date";
 
-
-        ReturnActivity = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToList();
+        ReturnActivity = [.. (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date }))];
 
         foreach (ProcessActivityData day in ReturnActivity)
         {
@@ -117,7 +115,7 @@ public class DataBaseHandler
     public async Task WriteDay(DayData day)
     {
         day.ConvertUsableDataToSaveData();
-        
+
         string sql = @"INSERT OR REPLACE INTO Days (Date,WorkedAmmount,RestedAmmount,IdleAmmount)
                          VALUES (@Date,@WorkedAmmount,@RestedAmmount,@IdleAmmount)";
 
@@ -151,7 +149,7 @@ public class DataBaseHandler
 
     public async Task<List<DayData>> ReadMonth(string Month = "", string year = "")
     {
-        List<DayData> ReturnDays = new();
+        List<DayData> ReturnDays = [];
 
         string sql;
         if (string.IsNullOrEmpty(Month) || string.IsNullOrWhiteSpace(year))
@@ -164,7 +162,7 @@ public class DataBaseHandler
                         WHERE Date Like @Pattern";
         }
 
-        ReturnDays = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Pattern = $"{Month}%{year}" })).ToList();
+        ReturnDays = [.. (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Pattern = $"{Month}%{year}" }))];
 
         foreach (DayData day in ReturnDays)
         {
@@ -195,7 +193,6 @@ public class DataBaseHandler
                         (SELECT MAX(CAST({collumnData} as INT)) FROM Days
                         WHERE Date LIKE @Template)";
 
-
             retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Template = $"{Month}%{year}" })).FirstOrDefault();
         }
 
@@ -219,7 +216,6 @@ public class DataBaseHandler
         }
         else
         {
-
             sql = @$"SELECT * FROM Days 
                         WHERE @Activity = 
                         (SELECT MAX(@Activity) FROM Days
@@ -233,5 +229,4 @@ public class DataBaseHandler
 
         return retrivedDay;
     }
-
 }

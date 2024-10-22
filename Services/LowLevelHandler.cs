@@ -38,14 +38,11 @@ public class LowLevelHandler
     [DllImport("user32.dll")]
     private static extern nint GetForegroundWindow();
 
-
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
     private static extern int GetWindowText(nint hWnd, StringBuilder lpString, int nMaxCount);
 
-
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint GetWindowThreadProcessId(nint hWnd, out uint lpdwProcessId);
-
 
     [DllImport("psapi.dll")]
     private static extern uint GetModuleFileNameEx(nint hProcess, nint hModule, StringBuilder lpBaseName, int nSize);
@@ -71,7 +68,7 @@ public class LowLevelHandler
     public string GetWindowTitle(nint hWnd)
     {
         const int nChars = 256;
-        StringBuilder windowTitle = new StringBuilder(nChars);
+        StringBuilder windowTitle = new(nChars);
         GetWindowText(hWnd, windowTitle, nChars);
         return windowTitle.ToString();
     }
@@ -82,7 +79,7 @@ public class LowLevelHandler
         Process process = Process.GetProcessById((int)processId);
 
         const int nChars = 1024;
-        StringBuilder applicationName = new StringBuilder(nChars);
+        StringBuilder applicationName = new(nChars);
         GetModuleFileNameEx(process.Handle, nint.Zero, applicationName, nChars);
 
         // Get only the executable file name
@@ -93,9 +90,9 @@ public class LowLevelHandler
 
     public List<string> GetBackgroundApplicationsName()
     {
-        HashSet<string> Appnames = new();
+        HashSet<string> Appnames = [];
 
-        List<nint> windows = new List<nint>();
+        List<nint> windows = [];
         EnumWindows(EnumWindowsCallback, GCHandle.ToIntPtr(GCHandle.Alloc(windows)));
 
         foreach (nint windowId in windows)
@@ -103,13 +100,13 @@ public class LowLevelHandler
             Appnames.Add(GetProcessname(windowId));
         }
 
-        return Appnames.ToList();
+        return [.. Appnames];
     }
 
     public Vector2 GetMousePos()
     {
         GetCursorPos(out POINT p);
-        Vector2 pos = new Vector2(p.X, p.Y);
+        Vector2 pos = new(p.X, p.Y);
 
         return pos;
     }
@@ -117,7 +114,7 @@ public class LowLevelHandler
     public bool IsRunningAsAdmin()
     {
         WindowsIdentity identity = WindowsIdentity.GetCurrent();
-        WindowsPrincipal principal = new WindowsPrincipal(identity);
+        WindowsPrincipal principal = new(identity);
 
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }

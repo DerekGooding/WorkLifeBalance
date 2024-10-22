@@ -6,7 +6,7 @@ namespace WorkLifeBalance.ViewModels;
 
 public partial class OptionsPageVM : SecondWindowPageVMBase
 {
-    private ISecondWindowService secondWindowService;
+    private readonly ISecondWindowService secondWindowService;
     public OptionsPageVM(ISecondWindowService secondWindowService)
     {
         this.secondWindowService = secondWindowService;

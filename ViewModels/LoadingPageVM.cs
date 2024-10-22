@@ -1,5 +1,3 @@
 ﻿namespace WorkLifeBalance.ViewModels;
 
-public class LoadingPageVM : SecondWindowPageVMBase
-{
-}
+public class LoadingPageVM : SecondWindowPageVMBase;

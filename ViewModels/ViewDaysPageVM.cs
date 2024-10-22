@@ -11,32 +11,32 @@ namespace WorkLifeBalance.ViewModels;
 
 public partial class ViewDaysPageVM : SecondWindowPageVMBase
 {
-    public ObservableCollection<DayData> LoadedData { get; set; } = new();
+    public ObservableCollection<DayData> LoadedData { get; set; } = [];
 
     [ObservableProperty]
     public int[]? filterDays;
 
     [ObservableProperty]
-    public int selectedDay = 0;
-    
+    public int selectedDay;
+
     [ObservableProperty]
     public int[]? filterMonths;
 
     [ObservableProperty]
-    public int selectedMonth = 0;
-    
+    public int selectedMonth;
+
     [ObservableProperty]
     public int[]? filterYears;
 
     [ObservableProperty]
-    public int selectedYear = 0;
+    public int selectedYear;
 
     private DayData[]? backupdata;
     //use this to request the correct page when leaving the DayActivity page
-    private int LoadedPageType = 0;
-    private ISecondWindowService secondWindowService;
-    private DataBaseHandler database;
-    private DataStorageFeature dataStorage;
+    private int LoadedPageType;
+    private readonly ISecondWindowService secondWindowService;
+    private readonly DataBaseHandler database;
+    private readonly DataStorageFeature dataStorage;
     public ViewDaysPageVM(ISecondWindowService secondWindowService, DataBaseHandler database, DataStorageFeature dataStorage)
     {
         RequiredWindowSize = new Vector2(710, 570);
@@ -50,25 +50,25 @@ public partial class ViewDaysPageVM : SecondWindowPageVMBase
     {
         //use the database to choose what days/month/years should the filters contain
         DateOnly Today = dataStorage.TodayData.DateC;
-        List<int> Days = new();
-        List<int> Months = new();
-        List<int> Years = new();
+        List<int> Days = [];
+        List<int> Months = [];
+        List<int> Years = [];
         for (int x = 0; x < 31; x++)
         {
             Days.Add(x);
-            FilterDays = Days.ToArray();
+            FilterDays = [.. Days];
         }
         for (int x = 0; x < 13; x++)
         {
             Months.Add(x);
-            FilterMonths = Months.ToArray();
+            FilterMonths = [.. Months];
         }
         for (int x = Today.Year; x > 2020 ; x--)
         {
             Years.Add(x);
         }
         Years.Add(0);
-        FilterYears = Years.ToArray();
+        FilterYears = [.. Years];
     }
 
     private async Task RequiestData(int requiestedDataType = 0)
@@ -77,7 +77,7 @@ public partial class ViewDaysPageVM : SecondWindowPageVMBase
         DateTime previousMonthDateTime = currentDate.ToDateTime(new TimeOnly(0, 0, 0)).AddMonths(-1);
         DateOnly previousDate = DateOnly.FromDateTime(previousMonthDateTime);
 
-        List<DayData> Days = new();
+        List<DayData> Days = [];
         switch (requiestedDataType)
         {
             case 0:
@@ -101,7 +101,7 @@ public partial class ViewDaysPageVM : SecondWindowPageVMBase
         Days.Reverse();
         LoadedData = new ObservableCollection<DayData>(Days);
 
-        backupdata = LoadedData.ToArray();
+        backupdata = [.. LoadedData];
     }
 
     public override async Task OnPageOppeningAsync(object? args = null)

@@ -52,12 +52,12 @@ public partial class SettingsPageVM : SecondWindowPageVMBase
 
         StartWithWin = dataStorageFeature.Settings.StartWithWindowsC;
 
-        List<int> numbersTemp = new();
+        List<int> numbersTemp = [];
         for(int x = 1; x <= 300; x++)
         {
             numbersTemp.Add(x);
         }
-        Numbers = numbersTemp.ToArray();
+        Numbers = [.. numbersTemp];
     }
 
     public override async Task OnPageClosingAsync()
@@ -78,7 +78,9 @@ public partial class SettingsPageVM : SecondWindowPageVMBase
 
     private void ApplyStartToWindows()
     {
-        string startupFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), $"{dataStorageFeature.Settings.Version}.lnk");
+        FileInfo startupFolderPath = new(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Startup),
+            $"{dataStorageFeature.Settings.Version}.lnk"));
 
         if (dataStorageFeature.Settings.StartWithWindowsC)
         {
@@ -90,23 +92,23 @@ public partial class SettingsPageVM : SecondWindowPageVMBase
         }
     }
 
-    private void CreateShortcut(string startupfolder)
+    private void CreateShortcut(FileInfo startup)
     {
-        if (!File.Exists(startupfolder))
+        if (!startup.Exists)
         {
             WshShell shell = new();
-            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(startupfolder);
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(startup.FullName);
             shortcut.TargetPath = dataStorageFeature.Settings.AppDirectory;
             shortcut.WorkingDirectory = dataStorageFeature.Settings.AppDirectory;
             shortcut.Save();
         }
     }
 
-    private void DeleteShortcut(string startupfolder)
+    private static void DeleteShortcut(FileInfo startup)
     {
-        if (File.Exists(startupfolder))
+        if (startup.Exists)
         {
-            File.Delete(startupfolder);
+            startup.Delete();
         }
     }
 }

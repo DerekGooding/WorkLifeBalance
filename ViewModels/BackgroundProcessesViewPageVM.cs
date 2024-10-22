@@ -10,17 +10,21 @@ namespace WorkLifeBalance.ViewModels;
 
 public partial class BackgroundProcessesViewPageVM : SecondWindowPageVMBase
 {
-    public ObservableCollection<string> DetectedWindows { get; set; } = new();
-    public ObservableCollection<string> SelectedWindows { get; set; } = new();
+    public ObservableCollection<string> DetectedWindows { get; set; } = [];
+    public ObservableCollection<string> SelectedWindows { get; set; } = [];
 
     [ObservableProperty]
     private string activeWindow = "";
 
-    private DataStorageFeature dataStorageFeature;
-    private LowLevelHandler lowLevelHandler;
-    private ActivityTrackerFeature activityTrackerFeature;
-    private ISecondWindowService secondWindowService;
-    public BackgroundProcessesViewPageVM(DataStorageFeature dataStorageFeature, LowLevelHandler lowLevelHandler, ActivityTrackerFeature activityTrackerFeature, ISecondWindowService secondWindowService)
+    private readonly DataStorageFeature dataStorageFeature;
+    private readonly LowLevelHandler lowLevelHandler;
+    private readonly ActivityTrackerFeature activityTrackerFeature;
+    private readonly ISecondWindowService secondWindowService;
+    public BackgroundProcessesViewPageVM(
+        DataStorageFeature dataStorageFeature,
+        LowLevelHandler lowLevelHandler,
+        ActivityTrackerFeature activityTrackerFeature,
+        ISecondWindowService secondWindowService)
     {
         RequiredWindowSize = new Vector2(700, 570);
         WindowPageName = "Customize Work Apps";
@@ -49,7 +53,7 @@ public partial class BackgroundProcessesViewPageVM : SecondWindowPageVMBase
     public override async Task OnPageClosingAsync()
     {
         activityTrackerFeature.OnWindowChange -= UpdateActiveWindowUi;
-        dataStorageFeature.AutoChangeData.WorkingStateWindows = SelectedWindows.ToArray();
+        dataStorageFeature.AutoChangeData.WorkingStateWindows = [.. SelectedWindows];
         await dataStorageFeature.SaveData();
     }
 

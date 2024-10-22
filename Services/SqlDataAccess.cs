@@ -22,7 +22,7 @@ public class SqlDataAccess
                 {
                     try
                     {
-                        var rows = await connection.ExecuteScalarAsync<int>(sql, parameters);
+                        int rows = await connection.ExecuteScalarAsync<int>(sql, parameters);
                         await transaction.CommitAsync();
                         return rows;
                     }
@@ -49,12 +49,12 @@ public class SqlDataAccess
             using (SQLiteConnection connection = new(ConnectionString))
             {
                 await connection.OpenAsync();
-                
+
                 using (SQLiteTransaction transaction = connection.BeginTransaction())
                 {
                     try
                     {
-                        var rows =  await connection.ExecuteAsync(sql, parameters);
+                        int rows =  await connection.ExecuteAsync(sql, parameters);
                         await transaction.CommitAsync();
 
                         return rows;
@@ -84,7 +84,7 @@ public class SqlDataAccess
                 await connection.OpenAsync();
                 try
                 {
-                    var rows = await connection.QueryAsync<T>(sql, parameters);
+                    IEnumerable<T> rows = await connection.QueryAsync<T>(sql, parameters);
                     return rows.ToList();
                 }
                 catch (Exception ex)

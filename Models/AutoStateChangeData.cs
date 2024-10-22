@@ -6,7 +6,7 @@ public class AutoStateChangeData
     public ProcessActivityData[] Activities { get; set; } = Array.Empty<ProcessActivityData>();
     public string[] WorkingStateWindows { get; set; } = Array.Empty<string>();
 
-    public Dictionary<string, TimeOnly> ActivitiesC = new();
+    public Dictionary<string, TimeOnly> ActivitiesC = [];
 
     public void ConvertSaveDataToUsableData()
     {
@@ -27,8 +27,7 @@ public class AutoStateChangeData
     {
         try
         {
-            List<ProcessActivityData> processActivities = new();
-
+            List<ProcessActivityData> processActivities = [];
 
             foreach (KeyValuePair<string, TimeOnly> activity in ActivitiesC)
             {
@@ -44,7 +43,7 @@ public class AutoStateChangeData
                 processActivities.Add(process);
             }
 
-            Activities = processActivities.ToArray();
+            Activities = [.. processActivities];
         }
         catch (Exception ex)
         {
