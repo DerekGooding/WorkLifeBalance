@@ -4,16 +4,15 @@ using System.Windows.Controls;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.ViewModels;
 
-namespace WorkLifeBalance.Views
+namespace WorkLifeBalance.Views;
+
+/// <summary>
+/// Interaction logic for ViewDayDetailsPage.xaml
+/// </summary>
+public partial class ViewDayDetailsPage : Page
 {
-    /// <summary>
-    /// Interaction logic for ViewDayDetailsPage.xaml
-    /// </summary>
-    public partial class ViewDayDetailsPage : Page
+    public ViewDayDetailsPage()
     {
-        public ViewDayDetailsPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -1,16 +1,15 @@
 ﻿using System.Windows.Controls;
 using WorkLifeBalance.ViewModels;
 
-namespace WorkLifeBalance.Views
+namespace WorkLifeBalance.Views;
+
+/// <summary>
+/// Interaction logic for SettingsPage.xaml
+/// </summary>
+public partial class SettingsPage : Page
 {
-    /// <summary>
-    /// Interaction logic for SettingsPage.xaml
-    /// </summary>
-    public partial class SettingsPage : Page
+    public SettingsPage()
     {
-        public SettingsPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -6,205 +6,204 @@ using System.IO;
 using Serilog;
 using System;
 
-namespace WorkLifeBalance.Services
+namespace WorkLifeBalance.Services;
+
+public class SqlLiteDatabaseIntegrity
 {
-    public class SqlLiteDatabaseIntegrity
+    private readonly SqlDataAccess sqlDataAccess;
+    private readonly DataStorageFeature dataStorageFeature;
+    private readonly Dictionary<string, Func<Task>> DatabaseUpdates;
+    private string databasePath = "";
+
+    public SqlLiteDatabaseIntegrity(SqlDataAccess sqlDataAccess, DataStorageFeature dataStorageFeature)
     {
-        private readonly SqlDataAccess sqlDataAccess;
-        private readonly DataStorageFeature dataStorageFeature;
-        private readonly Dictionary<string, Func<Task>> DatabaseUpdates;
-        private string databasePath = "";
+        this.sqlDataAccess = sqlDataAccess;
+        this.dataStorageFeature = dataStorageFeature;
 
-        public SqlLiteDatabaseIntegrity(SqlDataAccess sqlDataAccess, DataStorageFeature dataStorageFeature)
+        databasePath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\WorkLifeBalance\RecordedData.db";
+
+        DatabaseUpdates = new()
         {
-            this.sqlDataAccess = sqlDataAccess;
-            this.dataStorageFeature = dataStorageFeature;
+            { "2.0.0", Create2_0_0V},
+            { "Beta", UpdateBetaTo2_0_0V}
+        };
+    }
 
-            databasePath = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\WorkLifeBalance\RecordedData.db";
-
-            DatabaseUpdates = new()
-            {
-                { "2.0.0", Create2_0_0V},
-                { "Beta", UpdateBetaTo2_0_0V}
-            };
+    public async Task CheckDatabaseIntegrity()
+    {
+        if (IsDatabasePresent())
+        {
+            string version = await GetDatabaseVersion();
+            await UpdateOrCreateDatabase(version);
         }
-
-        public async Task CheckDatabaseIntegrity()
+        else
         {
-            if (IsDatabasePresent())
+            Log.Warning("Database file not found, genereting one");
+            await DatabaseUpdates[dataStorageFeature.Settings.Version]();
+        }
+        Log.Information($"Database is up to date!");
+    }
+
+    private async Task UpdateOrCreateDatabase(string version)
+    {
+        //if the database doesn't have the latest version
+        if (version != dataStorageFeature.Settings.Version)
+        {
+            //else check if the version exists in the update list
+            if (DatabaseUpdates.TryGetValue(version, out Func<Task>? DBUpdateMethod))
             {
-                string version = await GetDatabaseVersion();
-                await UpdateOrCreateDatabase(version);
+                //if yes, execute the update, updating the database
+                await DBUpdateMethod();
+                //then we get the updated database version
+                string databaseVersion = await GetDatabaseVersion();
+                //if its not up to date, then we call this method again, to give it the next update
+                Log.Warning($"Database Updated to version {databaseVersion}");
+              
+                await UpdateOrCreateDatabase(databaseVersion);
             }
             else
             {
-                Log.Warning("Database file not found, genereting one");
+                Log.Error($"Database corupted, re-genereting it");
+                //if we don't have an update for that version, it means the databse is really old or bugged
+                //so we delete it and call the update with the current versiom, which will just create the databse
+                DeleteDatabaseFile();
                 await DatabaseUpdates[dataStorageFeature.Settings.Version]();
             }
-            Log.Information($"Database is up to date!");
         }
+    }
 
-        private async Task UpdateOrCreateDatabase(string version)
+    private void DeleteDatabaseFile()
+    {
+        if (File.Exists(databasePath))
         {
-            //if the database doesn't have the latest version
-            if (version != dataStorageFeature.Settings.Version)
+            File.Delete(databasePath);
+        }
+    }
+
+    private async Task<string> GetDatabaseVersion()
+    {
+        string version = "Beta";
+
+        string sql = "SELECT Version from Settings";
+
+        try
+        {
+            var result = (await sqlDataAccess.ReadDataAsync<string, dynamic>(sql, new { })).FirstOrDefault();
+            if(result != null)
             {
-                //else check if the version exists in the update list
-                if (DatabaseUpdates.TryGetValue(version, out Func<Task>? DBUpdateMethod))
-                {
-                    //if yes, execute the update, updating the database
-                    await DBUpdateMethod();
-                    //then we get the updated database version
-                    string databaseVersion = await GetDatabaseVersion();
-                    //if its not up to date, then we call this method again, to give it the next update
-                    Log.Warning($"Database Updated to version {databaseVersion}");
-                  
-                    await UpdateOrCreateDatabase(databaseVersion);
-                }
-                else
-                {
-                    Log.Error($"Database corupted, re-genereting it");
-                    //if we don't have an update for that version, it means the databse is really old or bugged
-                    //so we delete it and call the update with the current versiom, which will just create the databse
-                    DeleteDatabaseFile();
-                    await DatabaseUpdates[dataStorageFeature.Settings.Version]();
-                }
+                version = result;
             }
         }
-
-        private void DeleteDatabaseFile()
+        catch            
         {
-            if (File.Exists(databasePath))
-            {
-                File.Delete(databasePath);
-            }
+            Log.Warning("Database Version collumn not found, indicatin Beta version database");
         }
 
-        private async Task<string> GetDatabaseVersion()
+        return version;
+    }
+
+    private async Task UpdateDatabaseVersion(string version)
+    {
+        string sql = "SELECT COUNT(1) FROM Settings";
+        bool ExistVersionRow = (await sqlDataAccess.ExecuteAsync(sql, new { })) > 0;
+
+        string updateVersionSQL = "";
+
+        if(ExistVersionRow)
         {
-            string version = "Beta";
-
-            string sql = "SELECT Version from Settings";
-
-            try
-            {
-                var result = (await sqlDataAccess.ReadDataAsync<string, dynamic>(sql, new { })).FirstOrDefault();
-                if(result != null)
-                {
-                    version = result;
-                }
-            }
-            catch            
-            {
-                Log.Warning("Database Version collumn not found, indicatin Beta version database");
-            }
-
-            return version;
+            updateVersionSQL = "UPDATE Settings SET Version = @Version";
+        }
+        else
+        {
+            updateVersionSQL = "INSERT INTO Settings (Version) VALUES (@Version)";
         }
 
-        private async Task UpdateDatabaseVersion(string version)
-        {
-            string sql = "SELECT COUNT(1) FROM Settings";
-            bool ExistVersionRow = (await sqlDataAccess.ExecuteAsync(sql, new { })) > 0;
+        await sqlDataAccess.ExecuteAsync<dynamic>(updateVersionSQL, new { Version = version });
+    }
 
-            string updateVersionSQL = "";
+    private bool IsDatabasePresent()
+    {
+        return File.Exists(databasePath);
+    }
 
-            if(ExistVersionRow)
-            {
-                updateVersionSQL = "UPDATE Settings SET Version = @Version";
-            }
-            else
-            {
-                updateVersionSQL = "INSERT INTO Settings (Version) VALUES (@Version)";
-            }
+    private async Task UpdateBetaTo2_0_0V()
+    {
+        string sqlCreateVersionTable =
+            """
+                ALTER TABLE Settings
+                ADD COLUMN Version TEXT NOT NULL Default "2.0.0";
+            """;
+        string sqlCreateIdleAmmountTable =
+            """
+                ALTER TABLE Days
+                ADD COLUMN IdleAmmount TEXT NOT NULL Default '000000';
+            """;
+        string sqlRemoveStartupCornerTable =
+            """
+                ALTER TABLE Settings
+                DROP COLUMN StartUpCorner;
+            """;
+        string sqlRemoveDetectStateBoolTable =
+            """
+                ALTER TABLE Settings
+                DROP COLUMN AutoDetectWorking;
+            """;
+        string sqlRemoveDetectIdleBoolTable =
+            """
+                ALTER TABLE Settings
+                DROP COLUMN AutoDetectIdle;
+            """;
+        await sqlDataAccess.ExecuteAsync(sqlCreateVersionTable, new { });
+        await sqlDataAccess.ExecuteAsync(sqlCreateIdleAmmountTable, new { });
 
-            await sqlDataAccess.ExecuteAsync<dynamic>(updateVersionSQL, new { Version = version });
-        }
+        await sqlDataAccess.ExecuteAsync(sqlRemoveStartupCornerTable, new { });
+        await sqlDataAccess.ExecuteAsync(sqlRemoveDetectStateBoolTable, new { });
+        await sqlDataAccess.ExecuteAsync(sqlRemoveDetectIdleBoolTable, new { });
+    }
 
-        private bool IsDatabasePresent()
-        {
-            return File.Exists(databasePath);
-        }
+    private async Task Create2_0_0V()
+    {
+        string createActivitySQL =
+            """
+                CREATE TABLE "Activity" 
+                (
+            	"Date"	TEXT NOT NULL,
+            	"Process"	TEXT NOT NULL,
+            	"TimeSpent"	TEXT NOT NULL);
+            """;
+        await sqlDataAccess.ExecuteAsync(createActivitySQL, new { });
 
-        private async Task UpdateBetaTo2_0_0V()
-        {
-            string sqlCreateVersionTable =
-                """
-                    ALTER TABLE Settings
-                    ADD COLUMN Version TEXT NOT NULL Default "2.0.0";
-                """;
-            string sqlCreateIdleAmmountTable =
-                """
-                    ALTER TABLE Days
-                    ADD COLUMN IdleAmmount TEXT NOT NULL Default '000000';
-                """;
-            string sqlRemoveStartupCornerTable =
-                """
-                    ALTER TABLE Settings
-                    DROP COLUMN StartUpCorner;
-                """;
-            string sqlRemoveDetectStateBoolTable =
-                """
-                    ALTER TABLE Settings
-                    DROP COLUMN AutoDetectWorking;
-                """;
-            string sqlRemoveDetectIdleBoolTable =
-                """
-                    ALTER TABLE Settings
-                    DROP COLUMN AutoDetectIdle;
-                """;
-            await sqlDataAccess.ExecuteAsync(sqlCreateVersionTable, new { });
-            await sqlDataAccess.ExecuteAsync(sqlCreateIdleAmmountTable, new { });
+        string createDaysSQL =
+            """
+                CREATE TABLE "Days" (
+            	"Date"	TEXT NOT NULL UNIQUE,
+            	"WorkedAmmount"	TEXT NOT NULL DEFAULT '000000',
+                "IdleAmmount" TEXT NOT NULL DEFAULT '000000',
+            	"RestedAmmount"	TEXT NOT NULL DEFAULT '000000',
+            	PRIMARY KEY("Date"));
+            """;
+        await sqlDataAccess.ExecuteAsync(createDaysSQL, new { });
 
-            await sqlDataAccess.ExecuteAsync(sqlRemoveStartupCornerTable, new { });
-            await sqlDataAccess.ExecuteAsync(sqlRemoveDetectStateBoolTable, new { });
-            await sqlDataAccess.ExecuteAsync(sqlRemoveDetectIdleBoolTable, new { });
-        }
+        string createSettingsSQL =
+            """
+                CREATE TABLE "Settings" (
+            	"LastTimeOpened"	TEXT,
+            	"StartWithWindows"	INTEGER,
+            	"SaveInterval"	INTEGER,
+            	"AutoDetectInterval"	INTEGER,
+            	"AutoDetectIdleInterval"	INTEGER,
+            	"Version"	TEXT);
+            """;
+        await sqlDataAccess.ExecuteAsync(createSettingsSQL, new { });
 
-        private async Task Create2_0_0V()
-        {
-            string createActivitySQL =
-                """
-                    CREATE TABLE "Activity" 
-                    (
-                	"Date"	TEXT NOT NULL,
-                	"Process"	TEXT NOT NULL,
-                	"TimeSpent"	TEXT NOT NULL);
-                """;
-            await sqlDataAccess.ExecuteAsync(createActivitySQL, new { });
-
-            string createDaysSQL =
-                """
-                    CREATE TABLE "Days" (
-                	"Date"	TEXT NOT NULL UNIQUE,
-                	"WorkedAmmount"	TEXT NOT NULL DEFAULT '000000',
-                    "IdleAmmount" TEXT NOT NULL DEFAULT '000000',
-                	"RestedAmmount"	TEXT NOT NULL DEFAULT '000000',
-                	PRIMARY KEY("Date"));
-                """;
-            await sqlDataAccess.ExecuteAsync(createDaysSQL, new { });
-
-            string createSettingsSQL =
-                """
-                    CREATE TABLE "Settings" (
-                	"LastTimeOpened"	TEXT,
-                	"StartWithWindows"	INTEGER,
-                	"SaveInterval"	INTEGER,
-                	"AutoDetectInterval"	INTEGER,
-                	"AutoDetectIdleInterval"	INTEGER,
-                	"Version"	TEXT);
-                """;
-            await sqlDataAccess.ExecuteAsync(createSettingsSQL, new { });
-
-            string createWorkingWindowsSQL =
-                """
-                    CREATE TABLE "WorkingWindows" (
-                	"WorkingStateWindows"	TEXT NOT NULL UNIQUE);
-                """;
-            await sqlDataAccess.ExecuteAsync(createWorkingWindowsSQL, new { });
+        string createWorkingWindowsSQL =
+            """
+                CREATE TABLE "WorkingWindows" (
+            	"WorkingStateWindows"	TEXT NOT NULL UNIQUE);
+            """;
+        await sqlDataAccess.ExecuteAsync(createWorkingWindowsSQL, new { });
 
 
-            await UpdateDatabaseVersion("2.0.0");
-        }
+        await UpdateDatabaseVersion("2.0.0");
     }
 }

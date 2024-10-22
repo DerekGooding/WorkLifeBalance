@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using WorkLifeBalance.ViewModels;
 
-namespace WorkLifeBalance.Interfaces
+namespace WorkLifeBalance.Interfaces;
+
+public interface ISecondWindowService
 {
-    public interface ISecondWindowService
-    {
-        Task OpenWindowWith<T>(object? args = null) where T : SecondWindowPageVMBase;
-    }
+    Task OpenWindowWith<T>(object? args = null) where T : SecondWindowPageVMBase;
 }

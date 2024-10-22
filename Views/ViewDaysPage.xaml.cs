@@ -8,16 +8,15 @@ using System.Windows.Media;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.ViewModels;
 
-namespace WorkLifeBalance.Views
+namespace WorkLifeBalance.Views;
+
+/// <summary>
+/// Interaction logic for ViewDaysPage.xaml
+/// </summary>
+public partial class ViewDaysPage : Page
 {
-    /// <summary>
-    /// Interaction logic for ViewDaysPage.xaml
-    /// </summary>
-    public partial class ViewDaysPage : Page
+    public ViewDaysPage()
     {
-        public ViewDaysPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

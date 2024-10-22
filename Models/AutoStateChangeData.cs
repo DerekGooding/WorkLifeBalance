@@ -1,58 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WorkLifeBalance.Models
+namespace WorkLifeBalance.Models;
+
+[Serializable]
+public class AutoStateChangeData
 {
-    [Serializable]
-    public class AutoStateChangeData
+    public ProcessActivityData[] Activities { get; set; } = Array.Empty<ProcessActivityData>();
+    public string[] WorkingStateWindows { get; set; } = Array.Empty<string>();
+
+    public Dictionary<string, TimeOnly> ActivitiesC = new();
+
+    public void ConvertSaveDataToUsableData()
     {
-        public ProcessActivityData[] Activities { get; set; } = Array.Empty<ProcessActivityData>();
-        public string[] WorkingStateWindows { get; set; } = Array.Empty<string>();
-
-        public Dictionary<string, TimeOnly> ActivitiesC = new();
-
-        public void ConvertSaveDataToUsableData()
+        try
         {
-            try
+            foreach (ProcessActivityData activity in Activities)
             {
-                foreach (ProcessActivityData activity in Activities)
-                {
-                    activity.ConvertSaveDataToUsableData();
-                    ActivitiesC.Add(activity.Process, activity.TimeSpentC);
-                }
-            }
-            catch (Exception ex)
-            {
-                //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert data to usable data", ex);
+                activity.ConvertSaveDataToUsableData();
+                ActivitiesC.Add(activity.Process, activity.TimeSpentC);
             }
         }
-        public void ConvertUsableDataToSaveData()
+        catch (Exception ex)
         {
-            try
+            //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert data to usable data", ex);
+        }
+    }
+    public void ConvertUsableDataToSaveData()
+    {
+        try
+        {
+            List<ProcessActivityData> processActivities = new();
+
+
+            foreach (KeyValuePair<string, TimeOnly> activity in ActivitiesC)
             {
-                List<ProcessActivityData> processActivities = new();
-
-
-                foreach (KeyValuePair<string, TimeOnly> activity in ActivitiesC)
+                ProcessActivityData process = new()
                 {
-                    ProcessActivityData process = new()
-                    {
-                        //process.DateC = DataStorageFeature.Instance.TodayData.DateC;
-                        Process = activity.Key,
-                        TimeSpentC = activity.Value
-                    };
+                    //process.DateC = DataStorageFeature.Instance.TodayData.DateC;
+                    Process = activity.Key,
+                    TimeSpentC = activity.Value
+                };
 
-                    process.ConvertUsableDataToSaveData();
+                process.ConvertUsableDataToSaveData();
 
-                    processActivities.Add(process);
-                }
-
-                Activities = processActivities.ToArray();
+                processActivities.Add(process);
             }
-            catch (Exception ex)
-            {
-                //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert usable data to save data", ex);
-            }
+
+            Activities = processActivities.ToArray();
+        }
+        catch (Exception ex)
+        {
+            //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert usable data to save data", ex);
         }
     }
 }

@@ -6,89 +6,88 @@ using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Services.Feature;
 
-namespace WorkLifeBalance.Services
+namespace WorkLifeBalance.Services;
+
+//Main timer that runs once a second, other features can subscribe to it and have their own run interval
+public class AppTimer
 {
-    //Main timer that runs once a second, other features can subscribe to it and have their own run interval
-    public class AppTimer
+    private readonly DataStorageFeature dataStorageFeature;
+    private event Func<Task>? OnTimerTick;
+    private CancellationTokenSource CancelTick = new();
+
+    public AppTimer(DataStorageFeature dataStorageFeature)
     {
-        private readonly DataStorageFeature dataStorageFeature;
-        private event Func<Task>? OnTimerTick;
-        private CancellationTokenSource CancelTick = new();
+        this.dataStorageFeature = dataStorageFeature;
+    }
 
-        public AppTimer(DataStorageFeature dataStorageFeature)
+    public void StartTick()
+    {
+        CancelTick.Cancel();
+
+        CancelTick = new();
+
+        _ = TimerLoop(CancelTick.Token);
+    }
+
+    public void Subscribe(Func<Task> eventname)
+    {
+        if (OnTimerTick != null)
         {
-            this.dataStorageFeature = dataStorageFeature;
+            if (OnTimerTick.GetInvocationList().Contains(eventname)) return;
         }
+        OnTimerTick += eventname;
+        Log.Information($"{eventname.Method.Name} Subscribed to Main Timer");
+    }
 
-        public void StartTick()
+    public void UnSubscribe(Func<Task> eventname)
+    {
+        if (OnTimerTick == null) return;
+
+        if (OnTimerTick.GetInvocationList().Contains(eventname))
         {
-            CancelTick.Cancel();
-
-            CancelTick = new();
-
-            _ = TimerLoop(CancelTick.Token);
+            OnTimerTick -= eventname;
+            Log.Information($"{eventname.Method.Name} UnSubscribed from Main Timer");
         }
+    }
 
-        public void Subscribe(Func<Task> eventname)
+    public void Stop()
+    {
+        CancelTick.Cancel();
+    }
+
+    private async Task TimerLoop(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
         {
-            if (OnTimerTick != null)
+            //stop the timer if the app is not ready or is closing
+            if (!dataStorageFeature.IsAppReady && dataStorageFeature.IsClosingApp)
             {
-                if (OnTimerTick.GetInvocationList().Contains(eventname)) return;
+                Stop();
+                return;
             }
-            OnTimerTick += eventname;
-            Log.Information($"{eventname.Method.Name} Subscribed to Main Timer");
-        }
 
-        public void UnSubscribe(Func<Task> eventname)
-        {
-            if (OnTimerTick == null) return;
-
-            if (OnTimerTick.GetInvocationList().Contains(eventname))
+            try
             {
-                OnTimerTick -= eventname;
-                Log.Information($"{eventname.Method.Name} UnSubscribed from Main Timer");
+                //Delay the triggering of the main event to pause every feature from being
+                //triggered while saving, so data is not updated while is saving
+                if (dataStorageFeature.IsAppSaving)
+                {
+                    await Task.Delay(500, token);
+                    continue;
+                }
+
+                await Task.Delay(1000, token);
             }
-        }
-
-        public void Stop()
-        {
-            CancelTick.Cancel();
-        }
-
-        private async Task TimerLoop(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
+            catch (TaskCanceledException taskCancel)
             {
-                //stop the timer if the app is not ready or is closing
-                if (!dataStorageFeature.IsAppReady && dataStorageFeature.IsClosingApp)
-                {
-                    Stop();
-                    return;
-                }
-
-                try
-                {
-                    //Delay the triggering of the main event to pause every feature from being
-                    //triggered while saving, so data is not updated while is saving
-                    if (dataStorageFeature.IsAppSaving)
-                    {
-                        await Task.Delay(500, token);
-                        continue;
-                    }
-
-                    await Task.Delay(1000, token);
-                }
-                catch (TaskCanceledException taskCancel)
-                {
-                    Log.Information($"App Timer: {taskCancel.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "App Timer");
-                }
-
-                OnTimerTick?.Invoke();
+                Log.Information($"App Timer: {taskCancel.Message}");
             }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "App Timer");
+            }
+
+            OnTimerTick?.Invoke();
         }
     }
 }

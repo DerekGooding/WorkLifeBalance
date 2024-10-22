@@ -1,11 +1,10 @@
 ﻿using WorkLifeBalance.ViewModels;
 
-namespace WorkLifeBalance.Interfaces
+namespace WorkLifeBalance.Interfaces;
+
+public interface INavigationService
 {
-    public interface INavigationService
-    {
-        ViewModelBase ActiveView { get; }
-        
-        void NavigateTo<T>() where T : ViewModelBase;
-    }
+    ViewModelBase ActiveView { get; }
+    
+    void NavigateTo<T>() where T : ViewModelBase;
 }

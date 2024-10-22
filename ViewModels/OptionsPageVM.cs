@@ -3,28 +3,27 @@ using System.Numerics;
 using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 
-namespace WorkLifeBalance.ViewModels
+namespace WorkLifeBalance.ViewModels;
+
+public partial class OptionsPageVM : SecondWindowPageVMBase
 {
-    public partial class OptionsPageVM : SecondWindowPageVMBase
+    private ISecondWindowService secondWindowService;
+    public OptionsPageVM(ISecondWindowService secondWindowService)
     {
-        private ISecondWindowService secondWindowService;
-        public OptionsPageVM(ISecondWindowService secondWindowService)
-        {
-            this.secondWindowService = secondWindowService;
-            RequiredWindowSize = new Vector2(250, 320);
-            WindowPageName = "Options";
-        }
+        this.secondWindowService = secondWindowService;
+        RequiredWindowSize = new Vector2(250, 320);
+        WindowPageName = "Options";
+    }
 
-        [RelayCommand]
-        private void OpenSettings()
-        {
-            secondWindowService.OpenWindowWith<SettingsPageVM>();
-        }
+    [RelayCommand]
+    private void OpenSettings()
+    {
+        secondWindowService.OpenWindowWith<SettingsPageVM>();
+    }
 
-        [RelayCommand]
-        private void ConfigureAutoDetect()
-        {
-            secondWindowService.OpenWindowWith<BackgroundProcessesViewPageVM>();
-        }
+    [RelayCommand]
+    private void ConfigureAutoDetect()
+    {
+        secondWindowService.OpenWindowWith<BackgroundProcessesViewPageVM>();
     }
 }

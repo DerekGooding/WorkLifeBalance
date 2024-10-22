@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorkLifeBalance.ViewModels
+namespace WorkLifeBalance.ViewModels;
+
+public class LoadingPageVM : SecondWindowPageVMBase
 {
-    public class LoadingPageVM : SecondWindowPageVMBase
-    {
-    }
 }

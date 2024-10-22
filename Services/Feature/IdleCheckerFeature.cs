@@ -6,97 +6,96 @@ using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 using static Dapper.SqlMapper;
 
-namespace WorkLifeBalance.Services.Feature
+namespace WorkLifeBalance.Services.Feature;
+
+public class IdleCheckerFeature : FeatureBase
 {
-    public class IdleCheckerFeature : FeatureBase
+    private Vector2 _oldmousePosition = new(-1, -1);
+    private readonly AppStateHandler appStateHandler;
+    private readonly DataStorageFeature dataStorageFeature;
+    private readonly LowLevelHandler lowLevelHandler;
+    private readonly IFeaturesServices featuresServices;
+
+    private readonly int MinuteMiliseconds = 60000;
+    private readonly int IdleDelay = 3000;
+    private readonly int RestingDelay = 600000;
+    public IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelHandler lowLevelHandler, AppStateHandler appStateHandler, IFeaturesServices featuresServices)
     {
-        private Vector2 _oldmousePosition = new(-1, -1);
-        private readonly AppStateHandler appStateHandler;
-        private readonly DataStorageFeature dataStorageFeature;
-        private readonly LowLevelHandler lowLevelHandler;
-        private readonly IFeaturesServices featuresServices;
+        this.dataStorageFeature = dataStorageFeature;
+        this.lowLevelHandler = lowLevelHandler;
+        this.appStateHandler = appStateHandler;
+        this.featuresServices = featuresServices;
+    }
 
-        private readonly int MinuteMiliseconds = 60000;
-        private readonly int IdleDelay = 3000;
-        private readonly int RestingDelay = 600000;
-        public IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelHandler lowLevelHandler, AppStateHandler appStateHandler, IFeaturesServices featuresServices)
+    protected override Func<Task> ReturnFeatureMethod()
+    {
+        return TriggerCheckIdle;
+    }
+
+    private async Task TriggerCheckIdle()
+    {
+        if (IsFeatureRuning) return;
+
+        try
         {
-            this.dataStorageFeature = dataStorageFeature;
-            this.lowLevelHandler = lowLevelHandler;
-            this.appStateHandler = appStateHandler;
-            this.featuresServices = featuresServices;
-        }
+            IsFeatureRuning = true;
+            int delay;
 
-        protected override Func<Task> ReturnFeatureMethod()
-        {
-            return TriggerCheckIdle;
-        }
-
-        private async Task TriggerCheckIdle()
-        {
-            if (IsFeatureRuning) return;
-
-            try
+            if (appStateHandler.AppTimerState == AppState.Idle)
             {
-                IsFeatureRuning = true;
-                int delay;
-
-                if (appStateHandler.AppTimerState == AppState.Idle)
-                {
-                    delay = 2000;
-                }
-                else
-                {
-                    delay = (dataStorageFeature.Settings.AutoDetectIdleInterval * 60000) / 2;
-                }
-
-                await Task.Delay(delay, CancelTokenS.Token);
-                CheckIdle();
-            }
-            catch (TaskCanceledException taskCancel)
-            {
-                Log.Information($"Idle Checker: {taskCancel.Message}");
-            }
-            catch(Exception ex)
-            {
-                Log.Error(ex,"Idle Checker");
-            }
-            finally
-            {
-                IsFeatureRuning = false;
-            }
-        }
-
-        private void CheckIdle()
-        {
-            Vector2 newpos = Vector2.Zero;
-
-            try
-            {
-                newpos = lowLevelHandler.GetMousePos();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.Message);
-            }
-
-            if (_oldmousePosition == new Vector2(-1, -1))
-            {
-                _oldmousePosition = newpos;
-                return;
-            }
-
-            if (newpos == _oldmousePosition)
-            {
-                featuresServices.RemoveFeature<StateCheckerFeature>();
-                appStateHandler.SetAppState(AppState.Idle);
+                delay = 2000;
             }
             else
             {
-                featuresServices.AddFeature<StateCheckerFeature>();
+                delay = (dataStorageFeature.Settings.AutoDetectIdleInterval * 60000) / 2;
             }
 
-            _oldmousePosition = newpos;
+            await Task.Delay(delay, CancelTokenS.Token);
+            CheckIdle();
         }
+        catch (TaskCanceledException taskCancel)
+        {
+            Log.Information($"Idle Checker: {taskCancel.Message}");
+        }
+        catch(Exception ex)
+        {
+            Log.Error(ex,"Idle Checker");
+        }
+        finally
+        {
+            IsFeatureRuning = false;
+        }
+    }
+
+    private void CheckIdle()
+    {
+        Vector2 newpos = Vector2.Zero;
+
+        try
+        {
+            newpos = lowLevelHandler.GetMousePos();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.Message);
+        }
+
+        if (_oldmousePosition == new Vector2(-1, -1))
+        {
+            _oldmousePosition = newpos;
+            return;
+        }
+
+        if (newpos == _oldmousePosition)
+        {
+            featuresServices.RemoveFeature<StateCheckerFeature>();
+            appStateHandler.SetAppState(AppState.Idle);
+        }
+        else
+        {
+            featuresServices.AddFeature<StateCheckerFeature>();
+        }
+
+        _oldmousePosition = newpos;
     }
 }

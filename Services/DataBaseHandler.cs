@@ -5,94 +5,94 @@ using System.Linq;
 using System;
 using Dapper;
 
-namespace WorkLifeBalance.Services
+namespace WorkLifeBalance.Services;
+
+public class DataBaseHandler
 {
-    public class DataBaseHandler
+    private readonly SqlDataAccess dataAccess;
+
+    public DataBaseHandler(SqlDataAccess dataAccess)
     {
-        private readonly SqlDataAccess dataAccess;
+        this.dataAccess = dataAccess;
+    }
 
-        public DataBaseHandler(SqlDataAccess dataAccess)
-        {
-            this.dataAccess = dataAccess;
-        }
+    public async Task WriteAutoSateData(AutoStateChangeData autod)
+    {
+        autod.ConvertUsableDataToSaveData();
 
-        public async Task WriteAutoSateData(AutoStateChangeData autod)
-        {
-            autod.ConvertUsableDataToSaveData();
+        //I'm too dumb to figure out the sql for less calls
+        string DeleteOldWorkingWindowsSQL = @"DELETE FROM WorkingWindows";
 
-            //I'm too dumb to figure out the sql for less calls
-            string DeleteOldWorkingWindowsSQL = @"DELETE FROM WorkingWindows";
+        await dataAccess.ExecuteAsync(DeleteOldWorkingWindowsSQL, new { });
 
-            await dataAccess.ExecuteAsync(DeleteOldWorkingWindowsSQL, new { });
-
-            string InsertNewWorkingWindowsSQL = @"INSERT INTO WorkingWindows (WorkingStateWindows)
+        string InsertNewWorkingWindowsSQL = @"INSERT INTO WorkingWindows (WorkingStateWindows)
                   VALUES (@WorkingWindow)";
 
-            foreach(string window in autod.WorkingStateWindows)
-            {
-                await dataAccess.WriteDataAsync(InsertNewWorkingWindowsSQL, new { WorkingWindow = window });
-            }
+        foreach(string window in autod.WorkingStateWindows)
+        {
+            await dataAccess.WriteDataAsync(InsertNewWorkingWindowsSQL, new { WorkingWindow = window });
+        }
 
-            string UpdateActivitySql = @"UPDATE Activity
+        string UpdateActivitySql = @"UPDATE Activity
                                 SET TimeSpent = @TimeSpent
                                 WHERE Date = @Date AND Process = @Process";
 
-            string InsertActivitySql = @"INSERT INTO Activity (Date,Process,TimeSpent)
+        string InsertActivitySql = @"INSERT INTO Activity (Date,Process,TimeSpent)
                                VALUES (@Date,@Process,@TimeSpent)";
 
-            foreach (ProcessActivityData activity in autod.Activities)
+        foreach (ProcessActivityData activity in autod.Activities)
+        {
+            int affectedRows = await dataAccess.WriteDataAsync(UpdateActivitySql, activity);
+
+            if (affectedRows == 0)
             {
-                int affectedRows = await dataAccess.WriteDataAsync(UpdateActivitySql, activity);
-
-                if (affectedRows == 0)
-                {
-                    await dataAccess.WriteDataAsync(InsertActivitySql, activity);
-                }
+                await dataAccess.WriteDataAsync(InsertActivitySql, activity);
             }
-
         }
 
-        public async Task<AutoStateChangeData> ReadAutoStateData(string date)
-        {
-            AutoStateChangeData retrivedSettings = new();
+    }
 
-            string sql = @$"SELECT * FROM Activity
+    public async Task<AutoStateChangeData> ReadAutoStateData(string date)
+    {
+        AutoStateChangeData retrivedSettings = new();
+
+        string sql = @$"SELECT * FROM Activity
                             WHERE Date = @Date";
 
-            retrivedSettings.Activities = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToArray();
+        retrivedSettings.Activities = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToArray();
 
-            sql = @$"SELECT * FROM WorkingWindows";
+        sql = @$"SELECT * FROM WorkingWindows";
 
-            retrivedSettings.WorkingStateWindows = (await dataAccess.ReadDataAsync<string, dynamic>(sql, new { })).ToArray();
+        retrivedSettings.WorkingStateWindows = (await dataAccess.ReadDataAsync<string, dynamic>(sql, new { })).ToArray();
 
-            retrivedSettings.ConvertSaveDataToUsableData();
-            
-            return retrivedSettings;
-        }
+        retrivedSettings.ConvertSaveDataToUsableData();
+        
+        return retrivedSettings;
+    }
 
-        public async Task<List<ProcessActivityData>> ReadDayActivity(string date)
-        {
-            List<ProcessActivityData> ReturnActivity = new();
+    public async Task<List<ProcessActivityData>> ReadDayActivity(string date)
+    {
+        List<ProcessActivityData> ReturnActivity = new();
 
-            string sql = @$"SELECT * from Activity 
+        string sql = @$"SELECT * from Activity 
                             WHERE Date Like @Date";
 
 
-            ReturnActivity = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToList();
+        ReturnActivity = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date })).ToList();
 
-            foreach (ProcessActivityData day in ReturnActivity)
-            {
-                day.ConvertSaveDataToUsableData();
-            }
-
-            return ReturnActivity;
+        foreach (ProcessActivityData day in ReturnActivity)
+        {
+            day.ConvertSaveDataToUsableData();
         }
 
-        public async Task WriteSettings(AppSettingsData sett)
-        {
-            sett.ConvertUsableDataToSaveData();
+        return ReturnActivity;
+    }
 
-            string sql = @"UPDATE Settings 
+    public async Task WriteSettings(AppSettingsData sett)
+    {
+        sett.ConvertUsableDataToSaveData();
+
+        string sql = @"UPDATE Settings 
                         SET LastTimeOpened = @LastTimeOpened,
                         StartWithWindows = @StartWithWindows,
                         SaveInterval = @SaveInterval,
@@ -100,144 +100,143 @@ namespace WorkLifeBalance.Services
                         AutoDetectIdleInterval = @AutoDetectIdleInterval
                         LIMIT 1";
 
-            await dataAccess.WriteDataAsync(sql, sett);
-        }
+        await dataAccess.WriteDataAsync(sql, sett);
+    }
 
-        public async Task<AppSettingsData> ReadSettings()
-        {
-            AppSettingsData? retrivedSettings;
+    public async Task<AppSettingsData> ReadSettings()
+    {
+        AppSettingsData? retrivedSettings;
 
-            string sql = @$"SELECT * FROM Settings
+        string sql = @$"SELECT * FROM Settings
                             LIMIT 1";
 
-            retrivedSettings = (await dataAccess.ReadDataAsync<AppSettingsData, dynamic>(sql, new { })).FirstOrDefault();
+        retrivedSettings = (await dataAccess.ReadDataAsync<AppSettingsData, dynamic>(sql, new { })).FirstOrDefault();
 
-            retrivedSettings ??= new();
+        retrivedSettings ??= new();
 
-            retrivedSettings.ConvertSaveDataToUsableData();
+        retrivedSettings.ConvertSaveDataToUsableData();
 
-            return retrivedSettings;
-        }
+        return retrivedSettings;
+    }
 
-        public async Task WriteDay(DayData day)
-        {
-            day.ConvertUsableDataToSaveData();
-            
-            string sql = @"INSERT OR REPLACE INTO Days (Date,WorkedAmmount,RestedAmmount,IdleAmmount)
+    public async Task WriteDay(DayData day)
+    {
+        day.ConvertUsableDataToSaveData();
+        
+        string sql = @"INSERT OR REPLACE INTO Days (Date,WorkedAmmount,RestedAmmount,IdleAmmount)
                          VALUES (@Date,@WorkedAmmount,@RestedAmmount,@IdleAmmount)";
 
-            await dataAccess.WriteDataAsync(sql, day);
-        }
+        await dataAccess.WriteDataAsync(sql, day);
+    }
 
-        public async Task<DayData> ReadDay(string date)
-        {
-            DayData? retrivedDay;
+    public async Task<DayData> ReadDay(string date)
+    {
+        DayData? retrivedDay;
 
-            string sql = @$"SELECT * FROM Days
+        string sql = @$"SELECT * FROM Days
                           WHERE Date = @Date";
-            retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Date = date })).FirstOrDefault();
+        retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Date = date })).FirstOrDefault();
 
-            retrivedDay ??= new();
+        retrivedDay ??= new();
 
-            retrivedDay.ConvertSaveDataToUsableData();
+        retrivedDay.ConvertSaveDataToUsableData();
 
-            return retrivedDay;
-        }
+        return retrivedDay;
+    }
 
-        public async Task<int> ReadCountInMonth(string month)
-        {
-            int affectedRows = 0;
-            string sql = @$"SELECT COUNT(*) AS row_count
+    public async Task<int> ReadCountInMonth(string month)
+    {
+        int affectedRows = 0;
+        string sql = @$"SELECT COUNT(*) AS row_count
                             FROM Days WHERE date LIKE @Pattern";
-            affectedRows = await dataAccess.ExecuteAsync(sql, new { Pattern = $"{month}%%" });
+        affectedRows = await dataAccess.ExecuteAsync(sql, new { Pattern = $"{month}%%" });
 
-            return affectedRows;
-        }
+        return affectedRows;
+    }
 
-        public async Task<List<DayData>> ReadMonth(string Month = "", string year = "")
+    public async Task<List<DayData>> ReadMonth(string Month = "", string year = "")
+    {
+        List<DayData> ReturnDays = new();
+
+        string sql;
+        if (string.IsNullOrEmpty(Month) || string.IsNullOrWhiteSpace(year))
         {
-            List<DayData> ReturnDays = new();
-
-            string sql;
-            if (string.IsNullOrEmpty(Month) || string.IsNullOrWhiteSpace(year))
-            {
-                sql = @$"SELECT * from Days";
-            }
-            else
-            {
-                sql = @$"SELECT * from Days 
+            sql = @$"SELECT * from Days";
+        }
+        else
+        {
+            sql = @$"SELECT * from Days 
                         WHERE Date Like @Pattern";
-            }
-
-            ReturnDays = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Pattern = $"{Month}%{year}" })).ToList();
-
-            foreach (DayData day in ReturnDays)
-            {
-                day.ConvertSaveDataToUsableData();
-            }
-
-            return ReturnDays;
         }
 
-        public async Task<DayData> GetMaxValue(string collumnData, string Month = "", string year = "")
+        ReturnDays = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Pattern = $"{Month}%{year}" })).ToList();
+
+        foreach (DayData day in ReturnDays)
         {
-            DayData? retrivedDay = null;
+            day.ConvertSaveDataToUsableData();
+        }
 
-            string sql;
+        return ReturnDays;
+    }
 
-            if (string.IsNullOrEmpty(Month) || string.IsNullOrEmpty(year))
-            {
-                //pass the value directly because it brokes if I use it as a parameter
-                sql = @$"SELECT * FROM Days 
+    public async Task<DayData> GetMaxValue(string collumnData, string Month = "", string year = "")
+    {
+        DayData? retrivedDay = null;
+
+        string sql;
+
+        if (string.IsNullOrEmpty(Month) || string.IsNullOrEmpty(year))
+        {
+            //pass the value directly because it brokes if I use it as a parameter
+            sql = @$"SELECT * FROM Days 
                       WHERE CAST({collumnData} as INT) = 
                       (SELECT MAX(CAST({collumnData} as INT)) FROM Days)";
-                retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { })).FirstOrDefault();
-            }
-            else
-            {
-                sql = @$"SELECT * FROM Days 
+            retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { })).FirstOrDefault();
+        }
+        else
+        {
+            sql = @$"SELECT * FROM Days 
                         WHERE CAST({collumnData} as INT) = 
                         (SELECT MAX(CAST({collumnData} as INT)) FROM Days
                         WHERE Date LIKE @Template)";
 
 
-                retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Template = $"{Month}%{year}" })).FirstOrDefault();
-            }
-
-            retrivedDay ??= new();
-
-            retrivedDay.ConvertSaveDataToUsableData();
-
-            return retrivedDay;
+            retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Template = $"{Month}%{year}" })).FirstOrDefault();
         }
 
-        public async Task<ProcessActivityData> GetMostActiveActivity(string activity, string Month = "", string year = "")
-        {
-            ProcessActivityData? retrivedDay = null;
+        retrivedDay ??= new();
 
-            string sql;
-            if (string.IsNullOrEmpty(Month) || string.IsNullOrEmpty(year))
-            {
-                sql = @$"SELECT * FROM Days 
+        retrivedDay.ConvertSaveDataToUsableData();
+
+        return retrivedDay;
+    }
+
+    public async Task<ProcessActivityData> GetMostActiveActivity(string activity, string Month = "", string year = "")
+    {
+        ProcessActivityData? retrivedDay = null;
+
+        string sql;
+        if (string.IsNullOrEmpty(Month) || string.IsNullOrEmpty(year))
+        {
+            sql = @$"SELECT * FROM Days 
                         WHERE @Activity = 
                         (SELECT MAX(@Activity) FROM Days)";
-            }
-            else
-            {
+        }
+        else
+        {
 
-                sql = @$"SELECT * FROM Days 
+            sql = @$"SELECT * FROM Days 
                         WHERE @Activity = 
                         (SELECT MAX(@Activity) FROM Days
                         WHERE Date Like @Pattern)";
-            }
-            retrivedDay = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Activity = activity, Pattern = $"{Month}%{year}" })).FirstOrDefault();
-
-            retrivedDay ??= new();
-
-            retrivedDay.ConvertSaveDataToUsableData();
-
-            return retrivedDay;
         }
+        retrivedDay = (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Activity = activity, Pattern = $"{Month}%{year}" })).FirstOrDefault();
 
+        retrivedDay ??= new();
+
+        retrivedDay.ConvertSaveDataToUsableData();
+
+        return retrivedDay;
     }
+
 }

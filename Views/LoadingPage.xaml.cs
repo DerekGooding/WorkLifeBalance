@@ -13,16 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WorkLifeBalance.Views
+namespace WorkLifeBalance.Views;
+
+/// <summary>
+/// Interaction logic for LoadingPage.xaml
+/// </summary>
+public partial class LoadingPage : Page
 {
-    /// <summary>
-    /// Interaction logic for LoadingPage.xaml
-    /// </summary>
-    public partial class LoadingPage : Page
+    public LoadingPage()
     {
-        public LoadingPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

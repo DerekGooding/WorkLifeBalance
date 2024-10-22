@@ -3,82 +3,81 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WorkLifeBalance.Services.Feature
+namespace WorkLifeBalance.Services.Feature;
+
+public class StateCheckerFeature : FeatureBase
 {
-    public class StateCheckerFeature : FeatureBase
+    public bool IsFocusingOnWorkingWindow = false;
+    private readonly DataStorageFeature dataStorageFeature;
+    private readonly ActivityTrackerFeature activityTrackerFeature;
+    private readonly AppStateHandler appStateHandler;
+    public StateCheckerFeature(DataStorageFeature dataStorageFeature, ActivityTrackerFeature activityTrackerFeature, AppStateHandler appStateHandler)
     {
-        public bool IsFocusingOnWorkingWindow = false;
-        private readonly DataStorageFeature dataStorageFeature;
-        private readonly ActivityTrackerFeature activityTrackerFeature;
-        private readonly AppStateHandler appStateHandler;
-        public StateCheckerFeature(DataStorageFeature dataStorageFeature, ActivityTrackerFeature activityTrackerFeature, AppStateHandler appStateHandler)
+        this.dataStorageFeature = dataStorageFeature;
+        this.activityTrackerFeature = activityTrackerFeature;
+        this.appStateHandler = appStateHandler;
+    }
+
+    protected override Func<Task> ReturnFeatureMethod()
+    {
+        return TriggerWorkDetect;
+    }
+
+    private async Task TriggerWorkDetect()
+    {
+        if (IsFeatureRuning) return;
+
+        try
         {
-            this.dataStorageFeature = dataStorageFeature;
-            this.activityTrackerFeature = activityTrackerFeature;
-            this.appStateHandler = appStateHandler;
+            IsFeatureRuning = true;
+            await Task.Delay(dataStorageFeature.Settings.AutoDetectInterval * 1000, CancelTokenS.Token);
+            CheckStateChange();
         }
-
-        protected override Func<Task> ReturnFeatureMethod()
+        catch (TaskCanceledException taskCancel)
         {
-            return TriggerWorkDetect;
+            Log.Information($"State Checker: {taskCancel.Message}");
         }
-
-        private async Task TriggerWorkDetect()
+        catch (Exception ex)
         {
-            if (IsFeatureRuning) return;
-
-            try
-            {
-                IsFeatureRuning = true;
-                await Task.Delay(dataStorageFeature.Settings.AutoDetectInterval * 1000, CancelTokenS.Token);
-                CheckStateChange();
-            }
-            catch (TaskCanceledException taskCancel)
-            {
-                Log.Information($"State Checker: {taskCancel.Message}");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "State Checker");
-            }
-            finally
-            {
-                IsFeatureRuning = false;
-            }
+            Log.Error(ex, "State Checker");
         }
-
-        private void CheckStateChange()
+        finally
         {
-            if (string.IsNullOrEmpty(activityTrackerFeature.ActiveWindow)) return;
+            IsFeatureRuning = false;
+        }
+    }
 
-            IsFocusingOnWorkingWindow = dataStorageFeature.AutoChangeData.WorkingStateWindows.Contains(activityTrackerFeature.ActiveWindow);
+    private void CheckStateChange()
+    {
+        if (string.IsNullOrEmpty(activityTrackerFeature.ActiveWindow)) return;
 
-            switch (appStateHandler.AppTimerState)
-            {
-                case AppState.Working:
-                    if (!IsFocusingOnWorkingWindow)
-                    {
-                        appStateHandler.SetAppState(AppState.Resting);
-                    }
-                    break;
+        IsFocusingOnWorkingWindow = dataStorageFeature.AutoChangeData.WorkingStateWindows.Contains(activityTrackerFeature.ActiveWindow);
 
-                case AppState.Resting:
-                    if (IsFocusingOnWorkingWindow)
-                    {
-                        appStateHandler.SetAppState(AppState.Working);
-                    }
-                    break;
-                case AppState.Idle:
-                    if (IsFocusingOnWorkingWindow)
-                    {
-                        appStateHandler.SetAppState(AppState.Working);
-                    }
-                    else
-                    {
-                        appStateHandler.SetAppState(AppState.Resting);
-                    }
-                    break;
-            }
+        switch (appStateHandler.AppTimerState)
+        {
+            case AppState.Working:
+                if (!IsFocusingOnWorkingWindow)
+                {
+                    appStateHandler.SetAppState(AppState.Resting);
+                }
+                break;
+
+            case AppState.Resting:
+                if (IsFocusingOnWorkingWindow)
+                {
+                    appStateHandler.SetAppState(AppState.Working);
+                }
+                break;
+            case AppState.Idle:
+                if (IsFocusingOnWorkingWindow)
+                {
+                    appStateHandler.SetAppState(AppState.Working);
+                }
+                else
+                {
+                    appStateHandler.SetAppState(AppState.Resting);
+                }
+                break;
         }
     }
 }
