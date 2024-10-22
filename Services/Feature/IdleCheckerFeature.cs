@@ -11,9 +11,9 @@ public class IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelH
     private readonly LowLevelHandler lowLevelHandler = lowLevelHandler;
     private readonly IFeaturesServices featuresServices = featuresServices;
 
-    private readonly int MinuteMiliseconds = 60000;
-    private readonly int IdleDelay = 3000;
-    private readonly int RestingDelay = 600000;
+    //private readonly int MinuteMiliseconds = 60000;
+    //private readonly int IdleDelay = 3000;
+    //private readonly int RestingDelay = 600000;
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerCheckIdle;
 

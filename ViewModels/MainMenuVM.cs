@@ -70,22 +70,22 @@ public partial class MainMenuVM : ObservableObject
     [RelayCommand]
     public void OpenOptionsWindow() => secondWindowService.OpenWindowWith<OptionsPageVM>();
 
-    [RelayCommand]
-    public async Task CloseApp()
-    {
-        //if (dataStorageFeature.IsClosingApp) return;
+    //[RelayCommand]
+    //public async Task CloseApp()
+    //{
+    //    //if (dataStorageFeature.IsClosingApp) return;
 
-        //dataStorageFeature.IsClosingApp = true;
+    //    //dataStorageFeature.IsClosingApp = true;
 
-        ////CloseSideBar(null, null);
+    //    ////CloseSideBar(null, null);
 
-        //await dataStorageFeature.SaveData();
+    //    //await dataStorageFeature.SaveData();
 
-        //Log.Information("------------------App Shuting Down------------------");
+    //    //Log.Information("------------------App Shuting Down------------------");
 
-        //await Log.CloseAndFlushAsync();
+    //    //await Log.CloseAndFlushAsync();
 
-        //Application.Current.Shutdown();
-        //await Task.Delay(55);
-    }
+    //    //Application.Current.Shutdown();
+    //    //await Task.Delay(55);
+    //}
 }
