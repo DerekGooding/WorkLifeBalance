@@ -121,10 +121,7 @@ public class SqlLiteDatabaseIntegrity
         await sqlDataAccess.ExecuteAsync<dynamic>(updateVersionSQL, new { Version = version });
     }
 
-    private bool IsDatabasePresent()
-    {
-        return File.Exists(databasePath);
-    }
+    private bool IsDatabasePresent() => File.Exists(databasePath);
 
     private async Task UpdateBetaTo2_0_0V()
     {

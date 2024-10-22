@@ -1,9 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using WorkLifeBalance.ViewModels;
 
 namespace WorkLifeBalance;
 

@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Services.Feature;
 
 namespace WorkLifeBalance.Services;
@@ -50,10 +49,7 @@ public class AppTimer
         }
     }
 
-    public void Stop()
-    {
-        CancelTick.Cancel();
-    }
+    public void Stop() => CancelTick.Cancel();
 
     private async Task TimerLoop(CancellationToken token)
     {

@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using WorkLifeBalance.Models;
 using System.Linq;
-using System;
-using Dapper;
 
 namespace WorkLifeBalance.Services;
 

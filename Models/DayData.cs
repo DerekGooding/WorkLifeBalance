@@ -52,10 +52,7 @@ public class DayData
                     int.Parse(IdleAmmount.Substring(4, 2))
                 );
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("DayData Error", "Failed to convert data to usable data", ex);
-        }
+        catch { }
     }
     public void ConvertUsableDataToSaveData()
     {
@@ -69,9 +66,6 @@ public class DayData
 
             IdleAmmount = IdleAmmountC.ToString("HHmmss");
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("DayData Error", "Failed to convert usable data to save data", ex);
-        }
+        catch { }
     }
 }

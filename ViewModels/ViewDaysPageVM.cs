@@ -2,9 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.Interfaces;
 using System.Numerics;
@@ -124,10 +121,7 @@ public partial class ViewDaysPageVM : SecondWindowPageVMBase
     }
 
     [RelayCommand]
-    private void ReturnToPreviousPage()
-    {
-        secondWindowService.OpenWindowWith<ViewDataPageVM>();
-    }
+    private void ReturnToPreviousPage() => secondWindowService.OpenWindowWith<ViewDataPageVM>();
 
     [RelayCommand]
     private void ViewDay(DayData data)

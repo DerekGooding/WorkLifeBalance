@@ -31,8 +31,5 @@ public partial class MainWindow : Window
         }
     }
 
-    private void HideWindow(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
+    private void HideWindow(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
 }

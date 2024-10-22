@@ -1,10 +1,8 @@
 ﻿using Serilog;
 using System;
-using System.IO.Pipes;
 using System.Numerics;
 using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
-using static Dapper.SqlMapper;
 
 namespace WorkLifeBalance.Services.Feature;
 
@@ -27,10 +25,7 @@ public class IdleCheckerFeature : FeatureBase
         this.featuresServices = featuresServices;
     }
 
-    protected override Func<Task> ReturnFeatureMethod()
-    {
-        return TriggerCheckIdle;
-    }
+    protected override Func<Task> ReturnFeatureMethod() => TriggerCheckIdle;
 
     private async Task TriggerCheckIdle()
     {

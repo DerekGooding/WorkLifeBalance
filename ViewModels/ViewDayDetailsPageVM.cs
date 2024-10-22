@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Windows;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.Services;
@@ -56,8 +55,5 @@ public partial class ViewDayDetailsPageVM : SecondWindowPageVMBase
     }
 
     [RelayCommand]
-    private void BackToViewDaysPage()
-    {
-        secondWindowService.OpenWindowWith<ViewDaysPageVM>(LoadedPageType);
-    }
+    private void BackToViewDaysPage() => secondWindowService.OpenWindowWith<ViewDaysPageVM>(LoadedPageType);
 }

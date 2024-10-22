@@ -18,10 +18,7 @@ public class StateCheckerFeature : FeatureBase
         this.appStateHandler = appStateHandler;
     }
 
-    protected override Func<Task> ReturnFeatureMethod()
-    {
-        return TriggerWorkDetect;
-    }
+    protected override Func<Task> ReturnFeatureMethod() => TriggerWorkDetect;
 
     private async Task TriggerWorkDetect()
     {

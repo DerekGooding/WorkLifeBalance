@@ -17,10 +17,7 @@ public class TimeTrackerFeature : FeatureBase
         this.appStateHandler = appStateHandler;
     }
 
-    protected override Func<Task> ReturnFeatureMethod()
-    {
-        return TriggerUpdateSpentTime;
-    }
+    protected override Func<Task> ReturnFeatureMethod() => TriggerUpdateSpentTime;
 
     private Task TriggerUpdateSpentTime()
     {

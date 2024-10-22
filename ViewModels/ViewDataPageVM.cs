@@ -7,7 +7,6 @@ using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.Services;
 using WorkLifeBalance.Services.Feature;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WorkLifeBalance.ViewModels;
 
@@ -133,22 +132,13 @@ public partial class ViewDataPageVM : SecondWindowPageVMBase
     }
 
     [RelayCommand]
-    private void SeePreviousMonth()
-    {
-        secondWindowService.OpenWindowWith<ViewDaysPageVM>(2);
-    }
+    private void SeePreviousMonth() => secondWindowService.OpenWindowWith<ViewDaysPageVM>(2);
 
     [RelayCommand]
-    private void SeeCurrentMonth()
-    {
-        secondWindowService.OpenWindowWith<ViewDaysPageVM>(1);
-    }
+    private void SeeCurrentMonth() => secondWindowService.OpenWindowWith<ViewDaysPageVM>(1);
 
     [RelayCommand]
-    private void SeeAllDays()
-    {
-        secondWindowService.OpenWindowWith<ViewDaysPageVM>(0);
-    }
+    private void SeeAllDays() => secondWindowService.OpenWindowWith<ViewDaysPageVM>(0);
 
     private int ConvertTimeOnlyToSeconds(TimeOnly time)
     {

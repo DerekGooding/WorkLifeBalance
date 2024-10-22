@@ -12,13 +12,7 @@ public abstract partial class SecondWindowPageVMBase : ViewModelBase
     [ObservableProperty]
     public string windowPageName = "Page";
 
-    public virtual Task OnPageClosingAsync()
-    {
-        return Task.CompletedTask;
-    }
+    public virtual Task OnPageClosingAsync() => Task.CompletedTask;
 
-    public virtual Task OnPageOppeningAsync(object? args = null) 
-    {
-        return Task.CompletedTask;
-    }
+    public virtual Task OnPageOppeningAsync(object? args = null) => Task.CompletedTask;
 }

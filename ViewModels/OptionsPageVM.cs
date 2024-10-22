@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using System.Numerics;
-using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 
 namespace WorkLifeBalance.ViewModels;
@@ -16,14 +15,8 @@ public partial class OptionsPageVM : SecondWindowPageVMBase
     }
 
     [RelayCommand]
-    private void OpenSettings()
-    {
-        secondWindowService.OpenWindowWith<SettingsPageVM>();
-    }
+    private void OpenSettings() => secondWindowService.OpenWindowWith<SettingsPageVM>();
 
     [RelayCommand]
-    private void ConfigureAutoDetect()
-    {
-        secondWindowService.OpenWindowWith<BackgroundProcessesViewPageVM>();
-    }
+    private void ConfigureAutoDetect() => secondWindowService.OpenWindowWith<BackgroundProcessesViewPageVM>();
 }

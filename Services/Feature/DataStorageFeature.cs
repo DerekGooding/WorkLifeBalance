@@ -68,10 +68,7 @@ public class DataStorageFeature : FeatureBase
         Log.Information($"Load Complete!");
     }
 
-    protected override Func<Task> ReturnFeatureMethod()
-    {
-        return TriggerSaveData;
-    }
+    protected override Func<Task> ReturnFeatureMethod() => TriggerSaveData;
 
     private async Task TriggerSaveData()
     {

@@ -21,10 +21,7 @@ public class ActivityTrackerFeature : FeatureBase
         this.dataStorageFeature = dataStorageFeature;
     }
 
-    protected override Func<Task> ReturnFeatureMethod()
-    {
-        return TriggerRecordActivity;
-    }
+    protected override Func<Task> ReturnFeatureMethod() => TriggerRecordActivity;
 
     private Task TriggerRecordActivity()
     {

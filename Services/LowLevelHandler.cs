@@ -60,26 +60,15 @@ public class LowLevelHandler
         public int Y;
     }
 
-    public void EnableConsole()
-    {
-        AllocConsole();
-    }
+    public void EnableConsole() => AllocConsole();
 
-    public nint ReadForegroundWindow()
-    {
-        return GetForegroundWindow();
-    }
+    public nint ReadForegroundWindow() => GetForegroundWindow();
 
-    public void SetWindowLocation(nint windowHandle, int x, int y)
-    {
+    public void SetWindowLocation(nint windowHandle, int x, int y) =>
         // Call SetWindowPos with the SWP_NOSIZE and SWP_NOZORDER flags
         SetWindowPos(windowHandle, nint.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    }
 
-    public nint GetWindow(string? lpClassName, string lpWindowName)
-    {
-        return FindWindow(lpClassName, lpWindowName);
-    }
+    public nint GetWindow(string? lpClassName, string lpWindowName) => FindWindow(lpClassName, lpWindowName);
 
     public string GetWindowTitle(nint hWnd)
     {

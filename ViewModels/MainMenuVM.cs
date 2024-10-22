@@ -1,13 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Serilog;
 using System;
-using System.IO.Pipes;
-using System.Numerics;
 using System.Threading.Tasks;
-using System.Windows;
 using WorkLifeBalance.Interfaces;
-using WorkLifeBalance.Models;
 using WorkLifeBalance.Services;
 using WorkLifeBalance.Services.Feature;
 
@@ -58,20 +53,11 @@ public partial class MainMenuVM : ObservableObject
         timeTrackerFeature.OnSpentTimeChange += OnTimeSpentChanged;
     }
 
-    private void OnStateChanged(AppState state)
-    {
-        AppState = state;
-    }
+    private void OnStateChanged(AppState state) => AppState = state;
 
-    private void OnSavingData()
-    {
-        DateText = "Saving data...";
-    }
+    private void OnSavingData() => DateText = "Saving data...";
 
-    private void OnDataSaved()
-    {
-        DateText = $"Today: {dataStorageFeature.TodayData.DateC:MM/dd/yyyy}";
-    }
+    private void OnDataSaved() => DateText = $"Today: {dataStorageFeature.TodayData.DateC:MM/dd/yyyy}";
 
     private void OnTimeSpentChanged()
     {
@@ -81,16 +67,10 @@ public partial class MainMenuVM : ObservableObject
     }
 
     [RelayCommand]
-    public void OpenViewDataWindow()
-    {
-        secondWindowService.OpenWindowWith<ViewDataPageVM>();
-    }
+    public void OpenViewDataWindow() => secondWindowService.OpenWindowWith<ViewDataPageVM>();
 
     [RelayCommand]
-    public void OpenOptionsWindow()
-    {
-        secondWindowService.OpenWindowWith<OptionsPageVM>();
-    }
+    public void OpenOptionsWindow() => secondWindowService.OpenWindowWith<OptionsPageVM>();
 
     [RelayCommand]
     public async Task CloseApp()

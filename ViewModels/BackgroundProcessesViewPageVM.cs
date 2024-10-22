@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Services;
 using WorkLifeBalance.Services.Feature;
@@ -34,10 +33,7 @@ public partial class BackgroundProcessesViewPageVM : SecondWindowPageVMBase
         this.secondWindowService = secondWindowService;
     }
 
-    private void UpdateActiveWindowUi(string newwindow)
-    {
-        ActiveWindow = newwindow;
-    }
+    private void UpdateActiveWindowUi(string newwindow) => ActiveWindow = newwindow;
 
     private void InitializeProcessNames()
     {
@@ -61,10 +57,7 @@ public partial class BackgroundProcessesViewPageVM : SecondWindowPageVMBase
     }
 
     [RelayCommand]
-    private void ReturnToPreviousPage()
-    {
-        secondWindowService.OpenWindowWith<OptionsPageVM>();
-    }
+    private void ReturnToPreviousPage() => secondWindowService.OpenWindowWith<OptionsPageVM>();
 
     [RelayCommand]
     private void SelectProcess(string processName)
