@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using WorkLifeBalance.Services.Feature;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.ViewModels;
@@ -13,22 +14,22 @@ namespace WorkLifeBalance;
 /// </summary>
 public partial class App : Application
 {
-    private readonly ServiceProvider _servicesProvider;
-    private readonly IConfiguration _configuration;
-    public App()
-    {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    private readonly IHost _host;
 
-        _configuration = builder.Build();
+    public App() => _host = Host.CreateDefaultBuilder()
+               .ConfigureAppConfiguration((context, config) =>
+                   config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                         .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true)
+                         .AddEnvironmentVariables())
+               .ConfigureServices((context, services) =>
+               {
+                   // Pass the configuration object
+                   services.AddSingleton(context.Configuration);
 
-        IServiceCollection services = new ServiceCollection();
-
-        ConfigureServices(services);
-
-        _servicesProvider = services.BuildServiceProvider();
-    }
+                   // Register services and view models here
+                   ConfigureServices(services);
+               })
+               .Build();
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -46,7 +47,6 @@ public partial class App : Application
         services.AddSingleton<StateCheckerFeature>();
         services.AddSingleton<TimeTrackerFeature>();
         services.AddSingleton<SqlDataAccess>();
-        services.AddSingleton(_configuration);
         services.AddSingleton<DataBaseHandler>();
         services.AddSingleton<LowLevelHandler>();
         services.AddSingleton<AppStateHandler>();
@@ -57,9 +57,11 @@ public partial class App : Application
         services.AddSingleton<IFeaturesServices, FeaturesService>();
 
         //factory method for ViewModelBase.
-        services.AddSingleton<Func<Type, ViewModelBase>>(serviceProvider => viewModelType => (ViewModelBase)serviceProvider.GetRequiredService(viewModelType));
+        services.AddSingleton<Func<Type, ViewModelBase>>(serviceProvider => viewModelType =>
+            (ViewModelBase)serviceProvider.GetRequiredService(viewModelType));
         //factory method for Features.
-        services.AddSingleton<Func<Type, FeatureBase>>(serviceProvider => featureBase => (FeatureBase)serviceProvider.GetRequiredService(featureBase));
+        services.AddSingleton<Func<Type, FeatureBase>>(serviceProvider => featureBase =>
+            (FeatureBase)serviceProvider.GetRequiredService(featureBase));
 
         services.AddSingleton<BackgroundProcessesViewPageVM>();
         services.AddSingleton<MainMenuVM>();
@@ -76,7 +78,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        LowLevelHandler lowHandler = _servicesProvider.GetRequiredService<LowLevelHandler>();
+        LowLevelHandler lowHandler = _host.Services.GetRequiredService<LowLevelHandler>();
 
         //move show a popup and then if the user pressses ok, restart, if not, close app
         //if (!lowHandler.IsRunningAsAdmin())
@@ -85,7 +87,7 @@ public partial class App : Application
         //    return;
         //}
 
-        bool isDebug = _configuration.GetValue<bool>("Debug");
+        bool isDebug = _host.Services.GetRequiredService<IConfiguration>().GetValue<bool>("Debug");
         if (isDebug)
         {
             lowHandler.EnableConsole();
@@ -105,20 +107,20 @@ public partial class App : Application
 
     private async Task InitializeApp()
     {
-        DataStorageFeature dataStorageFeature = _servicesProvider.GetRequiredService<DataStorageFeature>();
+        DataStorageFeature dataStorageFeature = _host.Services.GetRequiredService<DataStorageFeature>();
 
-        SqlLiteDatabaseIntegrity sqlLiteDatabaseIntegrity = _servicesProvider.GetRequiredService<SqlLiteDatabaseIntegrity>();
+        SqlLiteDatabaseIntegrity sqlLiteDatabaseIntegrity = _host.Services.GetRequiredService<SqlLiteDatabaseIntegrity>();
 
         await sqlLiteDatabaseIntegrity.CheckDatabaseIntegrity();
 
         await dataStorageFeature.LoadData();
         
-        AppTimer appTimer = _servicesProvider.GetRequiredService<AppTimer>();
+        AppTimer appTimer = _host.Services.GetRequiredService<AppTimer>();
         
         //set app ready so timers can start
         dataStorageFeature.IsAppReady = true;
 
-        IFeaturesServices featuresService = _servicesProvider.GetRequiredService<IFeaturesServices>();
+        IFeaturesServices featuresService = _host.Services.GetRequiredService<IFeaturesServices>();
         featuresService.AddFeature<DataStorageFeature>();
         featuresService.AddFeature<TimeTrackerFeature>();
         featuresService.AddFeature<ActivityTrackerFeature>();
@@ -128,14 +130,14 @@ public partial class App : Application
         //starts the main timer
         appTimer.StartTick();
 
-        var mainWindow = _servicesProvider.GetRequiredService<MainWindow>();
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         Log.Information("------------------App Initialized------------------");
     }
 
     private void RestartApplicationWithAdmin()
     {
-        var DataStorageFeature = _servicesProvider.GetRequiredService<DataStorageFeature>();
+        var DataStorageFeature = _host.Services.GetRequiredService<DataStorageFeature>();
         var psi = new ProcessStartInfo
         {
             FileName = DataStorageFeature.Settings.AppExePath,
