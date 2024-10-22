@@ -1,8 +1,4 @@
-﻿using Serilog;
-using System;
-using System.Threading.Tasks;
-
-namespace WorkLifeBalance.Services.Feature;
+﻿namespace WorkLifeBalance.Services.Feature;
 
 public class ActivityTrackerFeature : FeatureBase
 {

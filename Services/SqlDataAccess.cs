@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Data.SQLite;
-using System.Threading;
-using System.Linq;
-using Serilog;
-using System;
+﻿using System.Data.SQLite;
 using Dapper;
 
 namespace WorkLifeBalance.Services;

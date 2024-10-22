@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace WorkLifeBalance.Services.Feature;
+﻿namespace WorkLifeBalance.Services.Feature;
 
 public class TimeTrackerFeature : FeatureBase
 {

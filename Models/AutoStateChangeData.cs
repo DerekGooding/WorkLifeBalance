@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace WorkLifeBalance.Models;
+﻿namespace WorkLifeBalance.Models;
 
 [Serializable]
 public class AutoStateChangeData

@@ -1,9 +1,4 @@
-﻿using Serilog;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace WorkLifeBalance.Services.Feature;
+﻿namespace WorkLifeBalance.Services.Feature;
 
 public class StateCheckerFeature : FeatureBase
 {

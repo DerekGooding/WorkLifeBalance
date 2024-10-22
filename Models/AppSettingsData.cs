@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System;
-
-namespace WorkLifeBalance.Models;
+﻿namespace WorkLifeBalance.Models;
 
 public class AppSettingsData
 {

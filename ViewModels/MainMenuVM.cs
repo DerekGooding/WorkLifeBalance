@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Services;
 using WorkLifeBalance.Services.Feature;

@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System;
-using System.Numerics;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 using WorkLifeBalance.Interfaces;
 
 namespace WorkLifeBalance.Services.Feature;

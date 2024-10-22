@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using WorkLifeBalance.ViewModels;
+﻿using WorkLifeBalance.ViewModels;
 
 namespace WorkLifeBalance.Interfaces;
 

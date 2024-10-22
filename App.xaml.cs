@@ -5,11 +5,6 @@ using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.ViewModels;
 using WorkLifeBalance.Services;
 using System.Diagnostics;
-using System.Windows;
-using System.IO;
-using Serilog;
-using System;
-using System.Threading.Tasks;
 
 namespace WorkLifeBalance;
 

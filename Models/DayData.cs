@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WorkLifeBalance.Models;
+﻿namespace WorkLifeBalance.Models;
 
 [Serializable]
 public class DayData

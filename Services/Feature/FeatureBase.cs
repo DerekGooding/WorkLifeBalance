@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace WorkLifeBalance.Services.Feature;
+﻿namespace WorkLifeBalance.Services.Feature;
 
 public abstract class FeatureBase
 {

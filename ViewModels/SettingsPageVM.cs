@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using IWshRuntimeLibrary;
-using System;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
 using WorkLifeBalance.Interfaces;
 using WorkLifeBalance.Services.Feature;
 using File = System.IO.File;

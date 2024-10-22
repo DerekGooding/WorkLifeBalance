@@ -1,14 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using WorkLifeBalance.Models;
 using WorkLifeBalance.Interfaces;
 using System.Numerics;
 using CommunityToolkit.Mvvm.Input;
 using WorkLifeBalance.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
 using WorkLifeBalance.Services.Feature;
 
 namespace WorkLifeBalance.ViewModels;
