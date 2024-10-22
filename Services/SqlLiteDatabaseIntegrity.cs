@@ -35,7 +35,7 @@ public class SqlLiteDatabaseIntegrity
             Log.Warning("Database file not found, genereting one");
             await DatabaseUpdates[dataStorageFeature.Settings.Version]();
         }
-        Log.Information($"Database is up to date!");
+        Log.Information("Database is up to date!");
     }
 
     private async Task UpdateOrCreateDatabase(string version)
@@ -57,7 +57,7 @@ public class SqlLiteDatabaseIntegrity
             }
             else
             {
-                Log.Error($"Database corupted, re-genereting it");
+                Log.Error("Database corupted, re-genereting it");
                 //if we don't have an update for that version, it means the databse is really old or bugged
                 //so we delete it and call the update with the current versiom, which will just create the databse
                 DeleteDatabaseFile();

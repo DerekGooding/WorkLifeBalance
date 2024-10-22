@@ -3,8 +3,8 @@
 [Serializable]
 public class AutoStateChangeData
 {
-    public ProcessActivityData[] Activities { get; set; } = Array.Empty<ProcessActivityData>();
-    public string[] WorkingStateWindows { get; set; } = Array.Empty<string>();
+    public ProcessActivityData[] Activities { get; set; } = [];
+    public string[] WorkingStateWindows { get; set; } = [];
 
     public Dictionary<string, TimeOnly> ActivitiesC = [];
 
@@ -18,10 +18,7 @@ public class AutoStateChangeData
                 ActivitiesC.Add(activity.Process, activity.TimeSpentC);
             }
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert data to usable data", ex);
-        }
+        catch { }
     }
     public void ConvertUsableDataToSaveData()
     {
@@ -45,9 +42,6 @@ public class AutoStateChangeData
 
             Activities = [.. processActivities];
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("StateChangeData Error", "Failed to convert usable data to save data", ex);
-        }
+        catch { }
     }
 }

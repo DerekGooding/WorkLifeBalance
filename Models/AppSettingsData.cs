@@ -10,7 +10,7 @@ public class AppSettingsData
     public int SaveInterval { get; set; } = 5;
     public int AutoDetectInterval { get; set; } = 1;
     public int AutoDetectIdleInterval { get; set; } = 1;
-    public int StartWithWindows { get; set; } = 0;
+    public int StartWithWindows { get; set; }
 
     public DateTime LastTimeOpenedC = new();
     public bool StartWithWindowsC = false;
@@ -35,7 +35,7 @@ public class AppSettingsData
                         int.Parse(LastTimeOpened.Substring(8, 4)),
                         int.Parse(LastTimeOpened.Substring(4, 2)),
                         int.Parse(LastTimeOpened.Substring(6, 2)),
-                        int.Parse(LastTimeOpened.Substring(0, 2)),
+                        int.Parse(LastTimeOpened[..2]),
                         int.Parse(LastTimeOpened.Substring(2, 2)),
                         0
                     );

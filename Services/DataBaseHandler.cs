@@ -45,12 +45,12 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
     {
         AutoStateChangeData retrivedSettings = new();
 
-        string sql = @$"SELECT * FROM Activity
+        string sql = @"SELECT * FROM Activity
                             WHERE Date = @Date";
 
         retrivedSettings.Activities = [.. (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date }))];
 
-        sql = @$"SELECT * FROM WorkingWindows";
+        sql = @"SELECT * FROM WorkingWindows";
 
         retrivedSettings.WorkingStateWindows = [.. (await dataAccess.ReadDataAsync<string, dynamic>(sql, new { }))];
 
@@ -63,7 +63,7 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
     {
         List<ProcessActivityData> ReturnActivity = [];
 
-        string sql = @$"SELECT * from Activity 
+        string sql = @"SELECT * from Activity 
                             WHERE Date Like @Date";
 
         ReturnActivity = [.. (await dataAccess.ReadDataAsync<ProcessActivityData, dynamic>(sql, new { Date = date }))];
@@ -95,7 +95,7 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
     {
         AppSettingsData? retrivedSettings;
 
-        string sql = @$"SELECT * FROM Settings
+        string sql = @"SELECT * FROM Settings
                             LIMIT 1";
 
         retrivedSettings = (await dataAccess.ReadDataAsync<AppSettingsData, dynamic>(sql, new { })).FirstOrDefault();
@@ -121,7 +121,7 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
     {
         DayData? retrivedDay;
 
-        string sql = @$"SELECT * FROM Days
+        string sql = @"SELECT * FROM Days
                           WHERE Date = @Date";
         retrivedDay = (await dataAccess.ReadDataAsync<DayData, dynamic>(sql, new { Date = date })).FirstOrDefault();
 
@@ -135,7 +135,7 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
     public async Task<int> ReadCountInMonth(string month)
     {
         int affectedRows = 0;
-        string sql = @$"SELECT COUNT(*) AS row_count
+        string sql = @"SELECT COUNT(*) AS row_count
                             FROM Days WHERE date LIKE @Pattern";
         affectedRows = await dataAccess.ExecuteAsync(sql, new { Pattern = $"{month}%%" });
 
@@ -149,11 +149,11 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
         string sql;
         if (string.IsNullOrEmpty(Month) || string.IsNullOrWhiteSpace(year))
         {
-            sql = @$"SELECT * from Days";
+            sql = @"SELECT * from Days";
         }
         else
         {
-            sql = @$"SELECT * from Days 
+            sql = @"SELECT * from Days 
                         WHERE Date Like @Pattern";
         }
 
@@ -205,13 +205,13 @@ public class DataBaseHandler(SqlDataAccess dataAccess)
         string sql;
         if (string.IsNullOrEmpty(Month) || string.IsNullOrEmpty(year))
         {
-            sql = @$"SELECT * FROM Days 
+            sql = @"SELECT * FROM Days 
                         WHERE @Activity = 
                         (SELECT MAX(@Activity) FROM Days)";
         }
         else
         {
-            sql = @$"SELECT * FROM Days 
+            sql = @"SELECT * FROM Days 
                         WHERE @Activity = 
                         (SELECT MAX(@Activity) FROM Days
                         WHERE Date Like @Pattern)";

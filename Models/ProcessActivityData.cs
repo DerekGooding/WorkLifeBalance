@@ -22,21 +22,18 @@ public class ProcessActivityData
             DateC = new DateOnly
                 (
                     int.Parse(Date.Substring(4, 4)),
-                    int.Parse(Date.Substring(0, 2)),
+                    int.Parse(Date[..2]),
                     int.Parse(Date.Substring(2, 2))
                 );
 
             TimeSpentC = new TimeOnly
                 (
-                    int.Parse(TimeSpent.Substring(0, 2)),
+                    int.Parse(TimeSpent[..2]),
                     int.Parse(TimeSpent.Substring(2, 2)),
                     int.Parse(TimeSpent.Substring(4, 2))
                 );
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("ProcessActivity Error", "Failed to convert data to usable data", ex);
-        }
+        catch { }
     }
     public void ConvertUsableDataToSaveData()
     {
@@ -46,9 +43,6 @@ public class ProcessActivityData
 
             TimeSpent = TimeSpentC.ToString("HHmmss");
         }
-        catch (Exception ex)
-        {
-            //MainWindow.ShowErrorBox("ProcessActivity Error", "Failed to convert usable data to save data", ex);
-        }
+        catch { }
     }
 }

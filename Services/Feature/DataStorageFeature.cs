@@ -4,8 +4,8 @@ namespace WorkLifeBalance.Services.Feature;
 
 public class DataStorageFeature(DataBaseHandler dataBaseHandler) : FeatureBase
 {
-    public bool IsAppSaving { get; private set; } = false;
-    public bool IsAppLoading { get; private set; } = false;
+    public bool IsAppSaving { get; private set; }
+    public bool IsAppLoading { get; private set; }
 
     public bool IsClosingApp = false;
     public bool IsAppReady = false;
@@ -24,7 +24,7 @@ public class DataStorageFeature(DataBaseHandler dataBaseHandler) : FeatureBase
     {
         if (IsAppSaving) return;
 
-        Log.Information($"Saving...");
+        Log.Information("Saving...");
 
         IsAppSaving = true;
 
@@ -38,7 +38,7 @@ public class DataStorageFeature(DataBaseHandler dataBaseHandler) : FeatureBase
 
         IsAppSaving = false;
 
-        Log.Information($"Save Complete!");
+        Log.Information("Save Complete!");
     }
 
     public async Task LoadData()
@@ -49,17 +49,17 @@ public class DataStorageFeature(DataBaseHandler dataBaseHandler) : FeatureBase
 
         OnLoading?.Invoke();
 
-        Log.Information($"Loading Day");
+        Log.Information("Loading Day");
         TodayData = await dataBaseHandler.ReadDay(TodayData.DateC.ToString("MMddyyyy"));
-        Log.Information($"Loading Settings");
+        Log.Information("Loading Settings");
         Settings = await dataBaseHandler.ReadSettings();
-        Log.Information($"Loading Activities");
+        Log.Information("Loading Activities");
         AutoChangeData = await dataBaseHandler.ReadAutoStateData(TodayData.DateC.ToString("MMddyyyy"));
 
         OnLoaded?.Invoke();
 
         IsAppLoading = false;
-        Log.Information($"Load Complete!");
+        Log.Information("Load Complete!");
     }
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerSaveData;

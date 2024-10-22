@@ -25,27 +25,27 @@ public class DayData
             DateC = new DateOnly
                 (
                     int.Parse(Date.Substring(4, 4)),
-                    int.Parse(Date.Substring(0, 2)),
+                    int.Parse(Date[..2]),
                     int.Parse(Date.Substring(2, 2))
                 );
 
             WorkedAmmountC = new TimeOnly
                 (
-                    int.Parse(WorkedAmmount.Substring(0, 2)),
+                    int.Parse(WorkedAmmount[..2]),
                     int.Parse(WorkedAmmount.Substring(2, 2)),
                     int.Parse(WorkedAmmount.Substring(4, 2))
                 );
 
             RestedAmmountC = new TimeOnly
                 (
-                    int.Parse(RestedAmmount.Substring(0, 2)),
+                    int.Parse(RestedAmmount[..2]),
                     int.Parse(RestedAmmount.Substring(2, 2)),
                     int.Parse(RestedAmmount.Substring(4, 2))
                 );
 
             IdleAmmountC = new TimeOnly
                 (
-                    int.Parse(IdleAmmount.Substring(0, 2)),
+                    int.Parse(IdleAmmount[..2]),
                     int.Parse(IdleAmmount.Substring(2, 2)),
                     int.Parse(IdleAmmount.Substring(4, 2))
                 );

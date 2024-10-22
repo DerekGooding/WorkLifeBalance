@@ -24,17 +24,9 @@ public class IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelH
         try
         {
             IsFeatureRuning = true;
-            int delay;
-
-            if (appStateHandler.AppTimerState == AppState.Idle)
-            {
-                delay = 2000;
-            }
-            else
-            {
-                delay = (dataStorageFeature.Settings.AutoDetectIdleInterval * 60000) / 2;
-            }
-
+            int delay = appStateHandler.AppTimerState == AppState.Idle
+                ? 2000
+                : dataStorageFeature.Settings.AutoDetectIdleInterval * 60000 / 2;
             await Task.Delay(delay, CancelTokenS.Token);
             CheckIdle();
         }
