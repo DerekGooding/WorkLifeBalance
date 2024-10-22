@@ -3,24 +3,17 @@ using WorkLifeBalance.Interfaces;
 
 namespace WorkLifeBalance.Services.Feature;
 
-public class IdleCheckerFeature : FeatureBase
+public class IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelHandler lowLevelHandler, AppStateHandler appStateHandler, IFeaturesServices featuresServices) : FeatureBase
 {
     private Vector2 _oldmousePosition = new(-1, -1);
-    private readonly AppStateHandler appStateHandler;
-    private readonly DataStorageFeature dataStorageFeature;
-    private readonly LowLevelHandler lowLevelHandler;
-    private readonly IFeaturesServices featuresServices;
+    private readonly AppStateHandler appStateHandler = appStateHandler;
+    private readonly DataStorageFeature dataStorageFeature = dataStorageFeature;
+    private readonly LowLevelHandler lowLevelHandler = lowLevelHandler;
+    private readonly IFeaturesServices featuresServices = featuresServices;
 
     private readonly int MinuteMiliseconds = 60000;
     private readonly int IdleDelay = 3000;
     private readonly int RestingDelay = 600000;
-    public IdleCheckerFeature(DataStorageFeature dataStorageFeature, LowLevelHandler lowLevelHandler, AppStateHandler appStateHandler, IFeaturesServices featuresServices)
-    {
-        this.dataStorageFeature = dataStorageFeature;
-        this.lowLevelHandler = lowLevelHandler;
-        this.appStateHandler = appStateHandler;
-        this.featuresServices = featuresServices;
-    }
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerCheckIdle;
 

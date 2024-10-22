@@ -1,17 +1,11 @@
 ﻿namespace WorkLifeBalance.Services.Feature;
 
-public class StateCheckerFeature : FeatureBase
+public class StateCheckerFeature(DataStorageFeature dataStorageFeature, ActivityTrackerFeature activityTrackerFeature, AppStateHandler appStateHandler) : FeatureBase
 {
     public bool IsFocusingOnWorkingWindow = false;
-    private readonly DataStorageFeature dataStorageFeature;
-    private readonly ActivityTrackerFeature activityTrackerFeature;
-    private readonly AppStateHandler appStateHandler;
-    public StateCheckerFeature(DataStorageFeature dataStorageFeature, ActivityTrackerFeature activityTrackerFeature, AppStateHandler appStateHandler)
-    {
-        this.dataStorageFeature = dataStorageFeature;
-        this.activityTrackerFeature = activityTrackerFeature;
-        this.appStateHandler = appStateHandler;
-    }
+    private readonly DataStorageFeature dataStorageFeature = dataStorageFeature;
+    private readonly ActivityTrackerFeature activityTrackerFeature = activityTrackerFeature;
+    private readonly AppStateHandler appStateHandler = appStateHandler;
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerWorkDetect;
 

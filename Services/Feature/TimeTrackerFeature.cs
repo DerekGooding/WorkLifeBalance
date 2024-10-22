@@ -1,18 +1,13 @@
 ﻿namespace WorkLifeBalance.Services.Feature;
 
-public class TimeTrackerFeature : FeatureBase
+public class TimeTrackerFeature(DataStorageFeature dataStorageFeature, AppStateHandler appStateHandler) : FeatureBase
 {
     public delegate void SpentTimeEvent();
     public event SpentTimeEvent? OnSpentTimeChange;
 
     private readonly TimeSpan OneSec = new (0, 0, 1);
-    private readonly AppStateHandler appStateHandler;
-    private readonly DataStorageFeature dataStorageFeature;
-    public TimeTrackerFeature(DataStorageFeature dataStorageFeature, AppStateHandler appStateHandler)
-    {
-        this.dataStorageFeature = dataStorageFeature;
-        this.appStateHandler = appStateHandler;
-    }
+    private readonly AppStateHandler appStateHandler = appStateHandler;
+    private readonly DataStorageFeature dataStorageFeature = dataStorageFeature;
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerUpdateSpentTime;
 

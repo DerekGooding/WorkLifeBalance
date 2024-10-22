@@ -3,16 +3,11 @@
 namespace WorkLifeBalance.Services;
 
 //Main timer that runs once a second, other features can subscribe to it and have their own run interval
-public class AppTimer
+public class AppTimer(DataStorageFeature dataStorageFeature)
 {
-    private readonly DataStorageFeature dataStorageFeature;
+    private readonly DataStorageFeature dataStorageFeature = dataStorageFeature;
     private event Func<Task>? OnTimerTick;
     private CancellationTokenSource CancelTick = new();
-
-    public AppTimer(DataStorageFeature dataStorageFeature)
-    {
-        this.dataStorageFeature = dataStorageFeature;
-    }
 
     public void StartTick()
     {

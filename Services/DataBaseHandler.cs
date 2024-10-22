@@ -2,14 +2,9 @@
 
 namespace WorkLifeBalance.Services;
 
-public class DataBaseHandler
+public class DataBaseHandler(SqlDataAccess dataAccess)
 {
-    private readonly SqlDataAccess dataAccess;
-
-    public DataBaseHandler(SqlDataAccess dataAccess)
-    {
-        this.dataAccess = dataAccess;
-    }
+    private readonly SqlDataAccess dataAccess = dataAccess;
 
     public async Task WriteAutoSateData(AutoStateChangeData autod)
     {

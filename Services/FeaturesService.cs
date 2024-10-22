@@ -3,15 +3,10 @@ using WorkLifeBalance.Services.Feature;
 
 namespace WorkLifeBalance.Services;
 
-public class FeaturesService : IFeaturesServices
+public class FeaturesService(Func<Type, FeatureBase> featureFactory, AppTimer appTimer) : IFeaturesServices
 {
-    private readonly Func<Type, FeatureBase> _featureFactory;
-    private readonly AppTimer _appTimer;
-    public FeaturesService(Func<Type, FeatureBase> featureFactory, AppTimer appTimer)
-    {
-        _featureFactory = featureFactory;
-        _appTimer = appTimer;
-    }
+    private readonly Func<Type, FeatureBase> _featureFactory = featureFactory;
+    private readonly AppTimer _appTimer = appTimer;
 
     public void AddFeature<TFeature>() where TFeature : FeatureBase
     {

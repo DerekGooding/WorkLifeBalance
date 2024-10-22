@@ -1,6 +1,6 @@
 ﻿namespace WorkLifeBalance.Services.Feature;
 
-public class ActivityTrackerFeature : FeatureBase
+public class ActivityTrackerFeature(LowLevelHandler lowLevelHandler, DataStorageFeature dataStorageFeature) : FeatureBase
 {
     public delegate void ActiveProcess(string ActiveWindow);
     public event ActiveProcess? OnWindowChange;
@@ -9,13 +9,8 @@ public class ActivityTrackerFeature : FeatureBase
 
     private readonly TimeSpan OneSec = new (0, 0, 1);
 
-    private readonly LowLevelHandler lowLevelHandler;
-    private readonly DataStorageFeature dataStorageFeature;
-    public ActivityTrackerFeature(LowLevelHandler lowLevelHandler, DataStorageFeature dataStorageFeature)
-    {
-        this.lowLevelHandler = lowLevelHandler;
-        this.dataStorageFeature = dataStorageFeature;
-    }
+    private readonly LowLevelHandler lowLevelHandler = lowLevelHandler;
+    private readonly DataStorageFeature dataStorageFeature = dataStorageFeature;
 
     protected override Func<Task> ReturnFeatureMethod() => TriggerRecordActivity;
 

@@ -2,7 +2,7 @@
 
 namespace WorkLifeBalance.Services.Feature;
 
-public class DataStorageFeature : FeatureBase
+public class DataStorageFeature(DataBaseHandler dataBaseHandler) : FeatureBase
 {
     public bool IsAppSaving { get; private set; } = false;
     public bool IsAppLoading { get; private set; } = false;
@@ -18,11 +18,8 @@ public class DataStorageFeature : FeatureBase
     public event Action? OnLoaded;
     public event Action? OnSaving;
     public event Action? OnSaved;
-    private readonly DataBaseHandler dataBaseHandler;
-    public DataStorageFeature(DataBaseHandler dataBaseHandler)
-    {
-        this.dataBaseHandler = dataBaseHandler;
-    }
+    private readonly DataBaseHandler dataBaseHandler = dataBaseHandler;
+
     public async Task SaveData()
     {
         if (IsAppSaving) return;
